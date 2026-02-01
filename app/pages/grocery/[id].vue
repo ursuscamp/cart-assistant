@@ -257,7 +257,8 @@ async function addSource() {
 
 async function removeItem(item: GroceryItem) {
   if (groceryStore.currentList) {
-    await groceryStore.updateItem(groceryStore.currentList.id, item.id, { is_checked: item.is_checked } as any)
+    await groceryStore.deleteItem(groceryStore.currentList.id, item.id)
+    toast.success('Item removed')
   }
 }
 

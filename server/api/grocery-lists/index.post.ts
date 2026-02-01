@@ -92,7 +92,7 @@ export default defineEventHandler(async (event) => {
   const itemsResult = db.exec(`
     SELECT gli.*, s.name as section_name
     FROM grocery_list_items gli
-    LEFT JOIN s ON gli.section_id = s.id
+    LEFT JOIN sections s ON gli.section_id = s.id
     WHERE gli.grocery_list_id = ?
     ORDER BY gli.section_id, gli.sort_order
   `, [groceryListId])

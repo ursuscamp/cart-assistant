@@ -1,13 +1,11 @@
 <template>
   <div class="max-w-6xl mx-auto space-y-6">
-    <!-- Header -->
     <div>
       <h1 class="text-3xl font-bold text-white">Settings</h1>
       <p class="text-bark-400 mt-1">Configure your grocery sections and preferences</p>
     </div>
 
     <div class="grid lg:grid-cols-2 gap-6">
-      <!-- Sections -->
       <div class="card">
         <div class="section-header">
           <div class="flex items-center gap-3">
@@ -25,83 +23,60 @@
           </button>
         </div>
         <div class="p-4 space-y-2 max-h-96 overflow-y-auto scrollbar-thin">
-            <div
-              v-for="(section, index) in sectionsStore.sections"
-              :key="section.id"
-              class="flex items-center gap-2 p-3 rounded-lg bg-bark-900/50 border border-bark-800"
-              :class="{ 'ring-2 ring-forest-500': draggedIndex === index }"
-              draggable="true"
-              @dragstart="onDragStart(index, $event)"
-              @dragover.prevent="onDragOver(index, $event)"
-              @drop="onDrop(index, $event)"
-              @dragend="onDragEnd"
-            >
-              <div class="cursor-grab text-bark-500 hover:text-bark-300">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8h16M4 16h16" />
-                </svg>
-              </div>
-              <span class="flex-1 font-medium text-white truncate">{{ section.name }}</span>
-              <div class="flex items-center gap-1">
-                <button
-                  @click="moveToTop(section.id)"
-                  class="p-1 rounded-lg text-bark-400 hover:text-forest-400 hover:bg-bark-800 transition-colors"
-                  title="Move to top"
-                >
-                  <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 11l7-7 7 7M5 19l7-7 7 7" />
-                  </svg>
-                </button>
-                <button
-                  @click="moveUp(section.id)"
-                  class="p-1 rounded-lg text-bark-400 hover:text-forest-400 hover:bg-bark-800 transition-colors"
-                  title="Move up"
-                >
-                  <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7" />
-                  </svg>
-                </button>
-                <button
-                  @click="moveDown(section.id)"
-                  class="p-1 rounded-lg text-bark-400 hover:text-forest-400 hover:bg-bark-800 transition-colors"
-                  title="Move down"
-                >
-                  <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-                  </svg>
-                </button>
-                <button
-                  @click="moveToBottom(section.id)"
-                  class="p-1 rounded-lg text-bark-400 hover:text-forest-400 hover:bg-bark-800 transition-colors"
-                  title="Move to bottom"
-                >
-                  <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 13l-7 7-7-7m14-8l-7 7-7-7" />
-                  </svg>
-                </button>
-                <div class="w-px h-5 bg-bark-700 mx-1"></div>
-                <button
-                  @click="editSection(section)"
-                  class="p-1 rounded-lg text-bark-400 hover:text-white hover:bg-bark-800 transition-colors"
-                >
-                  <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                  </svg>
-                </button>
-                <button
-                  @click="deleteSection(section)"
-                  class="p-1 rounded-lg text-bark-400 hover:text-red-400 hover:bg-red-900/20 transition-colors"
-                >
-                  <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                  </svg>
-                </button>
-              </div>
+          <div
+            v-for="(section, index) in sectionsStore.sections"
+            :key="section.id"
+            class="flex items-center gap-2 p-3 rounded-lg bg-bark-900/50 border border-bark-800"
+            :class="{ 'ring-2 ring-forest-500': draggedIndex === index }"
+            draggable="true"
+            @dragstart="onDragStart(index, $event)"
+            @dragover.prevent="onDragOver(index, $event)"
+            @drop="onDrop(index, $event)"
+            @dragend="onDragEnd"
+          >
+            <div class="cursor-grab text-bark-500 hover:text-bark-300">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8h16M4 16h16" />
+              </svg>
             </div>
+            <span class="flex-1 font-medium text-white truncate">{{ section.name }}</span>
+            <div class="flex items-center gap-1">
+              <button @click="moveToTop(section.id)" class="p-1 rounded-lg text-bark-400 hover:text-forest-400 hover:bg-bark-800" title="Move to top">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 11l7-7 7 7M5 19l7-7 7 7" />
+                </svg>
+              </button>
+              <button @click="moveUp(section.id)" class="p-1 rounded-lg text-bark-400 hover:text-forest-400 hover:bg-bark-800" title="Move up">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7" />
+                </svg>
+              </button>
+              <button @click="moveDown(section.id)" class="p-1 rounded-lg text-bark-400 hover:text-forest-400 hover:bg-bark-800" title="Move down">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                </svg>
+              </button>
+              <button @click="moveToBottom(section.id)" class="p-1 rounded-lg text-bark-400 hover:text-forest-400 hover:bg-bark-800" title="Move to bottom">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 13l-7 7-7-7m14-8l-7 7-7-7" />
+                </svg>
+              </button>
+              <div class="w-px h-5 bg-bark-700 mx-1"></div>
+              <button @click="editSection(section)" class="p-1 rounded-lg text-bark-400 hover:text-white hover:bg-bark-800">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                </svg>
+              </button>
+              <button @click="deleteSection(section)" class="p-1 rounded-lg text-bark-400 hover:text-red-400 hover:bg-red-900/20">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                </svg>
+              </button>
+            </div>
+          </div>
         </div>
       </div>
 
-      <!-- Item Mappings -->
       <div class="card">
         <div class="section-header">
           <div class="flex items-center gap-3">
@@ -114,57 +89,30 @@
           </div>
         </div>
         <div class="card-body">
-          <p class="text-sm text-bark-400 mb-4">
-            Manually overridden item-section assignments. These take precedence over LLM suggestions.
-          </p>
-          <input
-            v-model="mappingSearch"
-            type="text"
-            class="input-field mb-4"
-            placeholder="Search items..."
-          />
+          <p class="text-sm text-bark-400 mb-4">Manually overridden item-section assignments. These take precedence over LLM suggestions.</p>
+          <input v-model="mappingSearch" type="text" class="input-field mb-4" placeholder="Search items..." />
           <div v-if="filteredMappings.length > 0" class="space-y-2 max-h-64 overflow-y-auto scrollbar-thin">
-            <div
-              v-for="mapping in filteredMappings"
-              :key="mapping.item_name"
-              class="flex items-center justify-between p-3 rounded-lg bg-bark-900/50 border border-bark-800"
-            >
+            <div v-for="mapping in filteredMappings" :key="mapping.item_name" class="flex items-center justify-between p-3 rounded-lg bg-bark-900/50 border border-bark-800">
               <div>
                 <p class="font-medium text-white">{{ mapping.item_name }}</p>
-                <div class="flex items-center gap-2 mt-1">
-                  <span
-                    :class="[
-                      'text-xs px-2 py-0.5 rounded-full',
-                      mapping.is_manual_override
-                        ? 'bg-forest-600/30 text-forest-300'
-                        : 'bg-bark-700 text-bark-400'
-                    ]"
-                  >
-                    {{ mapping.section_name }}
-                  </span>
-                </div>
+                <span :class="['text-xs px-2 py-0.5 rounded-full', mapping.is_manual_override ? 'bg-forest-600/30 text-forest-300' : 'bg-bark-700 text-bark-400']">
+                  {{ mapping.section_name }}
+                </span>
               </div>
-              <select
-                :value="mapping.section_id"
-                @change="updateMapping(mapping.item_name, Number(($event.target as HTMLSelectElement).value))"
-                class="bg-bark-800 border border-bark-700 text-white text-sm rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-forest-500"
-              >
-                <option v-for="section in sectionsStore.sections" :key="section.id" :value="section.id">
-                  {{ section.name }}
-                </option>
-              </select>
+              <button @click="deleteMapping(mapping.item_name)" class="p-1.5 rounded-lg text-bark-400 hover:text-red-400 hover:bg-red-900/20">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                </svg>
+              </button>
             </div>
           </div>
           <div v-else class="text-center py-8">
             <p class="text-bark-400">No mappings yet</p>
-            <p class="text-sm text-bark-500 mt-1">
-              Drag items between sections in a grocery list to create mappings.
-            </p>
+            <p class="text-sm text-bark-500 mt-1">Mappings are created automatically when items are categorized.</p>
           </div>
         </div>
       </div>
 
-      <!-- LLM Configuration -->
       <div class="card lg:col-span-2">
         <div class="section-header">
           <div class="flex items-center gap-3">
@@ -188,9 +136,7 @@
           <div class="grid md:grid-cols-2 gap-4">
             <div class="p-4 rounded-lg bg-bark-900/50 border border-bark-800">
               <p class="text-xs text-bark-500 uppercase tracking-wide mb-1">API Key</p>
-              <p class="text-white font-mono">
-                {{ openrouterApiKey ? '••••••••••••••••' : 'Not configured' }}
-              </p>
+              <p class="text-white font-mono">{{ openrouterApiKey ? '••••••••••••••••' : 'Not configured' }}</p>
             </div>
             <div class="p-4 rounded-lg bg-bark-900/50 border border-bark-800">
               <p class="text-xs text-bark-500 uppercase tracking-wide mb-1">Model</p>
@@ -201,18 +147,8 @@
       </div>
     </div>
 
-    <!-- Add/Edit Section Modal -->
-    <Modal
-      :show="showAddSectionModal"
-      :title="editingSection ? 'Edit Section' : 'Add Section'"
-      @close="closeSectionModal"
-    >
-      <input
-        v-model="sectionForm.name"
-        type="text"
-        class="input-field"
-        :placeholder="editingSection ? 'Section name' : 'New section name'"
-      />
+    <Modal :show="showAddSectionModal" :title="editingSection ? 'Edit Section' : 'Add Section'" @close="closeSectionModal">
+      <input v-model="sectionForm.name" type="text" class="input-field" :placeholder="editingSection ? 'Section name' : 'New section name'" />
       <template #footer>
         <button @click="closeSectionModal" class="btn-secondary">Cancel</button>
         <button @click="saveSection" class="btn-primary">Save</button>
@@ -242,20 +178,25 @@ const draggedIndex = ref<number | null>(null)
 
 const filteredMappings = computed(() => {
   if (!mappingSearch.value.trim()) return mappings.value
-  return mappings.value.filter(m =>
-    m.item_name.toLowerCase().includes(mappingSearch.value.toLowerCase())
-  )
+  return mappings.value.filter(m => m.item_name.toLowerCase().includes(mappingSearch.value.toLowerCase()))
 })
 
 onMounted(async () => {
-  await Promise.all([
-    sectionsStore.fetchSections(),
-    fetchMappings()
-  ])
+  await Promise.all([sectionsStore.fetchSections(), fetchMappings()])
 })
 
 async function fetchMappings() {
   mappings.value = await $fetch('/api/mappings')
+}
+
+async function deleteMapping(itemName: string) {
+  try {
+    await $fetch(`/api/mappings/${encodeURIComponent(itemName)}`, { method: 'DELETE' })
+    await fetchMappings()
+    toast.success('Mapping deleted')
+  } catch (error) {
+    toast.error('Failed to delete mapping')
+  }
 }
 
 function editSection(section: Section) {
@@ -306,9 +247,7 @@ function onDragStart(index: number, event: DragEvent) {
 }
 
 function onDragOver(index: number, event: DragEvent) {
-  if (event.dataTransfer) {
-    event.dataTransfer.dropEffect = 'move'
-  }
+  if (event.dataTransfer) event.dataTransfer.dropEffect = 'move'
 }
 
 async function onDrop(targetIndex: number, event: DragEvent) {
@@ -317,14 +256,11 @@ async function onDrop(targetIndex: number, event: DragEvent) {
     onDragEnd()
     return
   }
-
   const sections = [...sectionsStore.sections]
   const [movedSection] = sections.splice(draggedIndex.value, 1)
   sections.splice(targetIndex, 0, movedSection)
-  
   const sectionIds = sections.map(s => s.id)
   await sectionsStore.reorderSections(sectionIds)
-  
   onDragEnd()
 }
 
@@ -338,8 +274,7 @@ async function moveToTop(sectionId: number) {
   if (index <= 0) return
   const [movedSection] = sections.splice(index, 1)
   sections.unshift(movedSection)
-  const newOrder = sections.map(s => s.id)
-  await sectionsStore.reorderSections(newOrder)
+  await sectionsStore.reorderSections(sections.map(s => s.id))
 }
 
 async function moveToBottom(sectionId: number) {
@@ -348,8 +283,7 @@ async function moveToBottom(sectionId: number) {
   if (index === -1 || index === sections.length - 1) return
   const [movedSection] = sections.splice(index, 1)
   sections.push(movedSection)
-  const newOrder = sections.map(s => s.id)
-  await sectionsStore.reorderSections(newOrder)
+  await sectionsStore.reorderSections(sections.map(s => s.id))
 }
 
 async function moveUp(sectionId: number) {
@@ -358,8 +292,7 @@ async function moveUp(sectionId: number) {
   if (index <= 0) return
   const [movedSection] = sections.splice(index, 1)
   sections.splice(index - 1, 0, movedSection)
-  const newOrder = sections.map(s => s.id)
-  await sectionsStore.reorderSections(newOrder)
+  await sectionsStore.reorderSections(sections.map(s => s.id))
 }
 
 async function moveDown(sectionId: number) {
@@ -368,16 +301,12 @@ async function moveDown(sectionId: number) {
   if (index === -1 || index >= sections.length - 1) return
   const [movedSection] = sections.splice(index, 1)
   sections.splice(index + 1, 0, movedSection)
-  const newOrder = sections.map(s => s.id)
-  await sectionsStore.reorderSections(newOrder)
+  await sectionsStore.reorderSections(sections.map(s => s.id))
 }
 
 async function updateMapping(itemName: string, sectionId: number) {
   try {
-    await $fetch(`/api/mappings/${encodeURIComponent(itemName)}`, {
-      method: 'PUT',
-      body: { section_id: sectionId }
-    })
+    await $fetch(`/api/mappings/${encodeURIComponent(itemName)}`, { method: 'PUT', body: { section_id: sectionId } })
     await fetchMappings()
     toast.success('Mapping updated')
   } catch (error) {

@@ -45,7 +45,11 @@ export async function getDatabase(): Promise<Database> {
 export async function saveDatabase() {
   if (!db) return
   const config = useRuntimeConfig()
-  const dbPath = config.public.databasePath
+  let dbPath = config.public.databasePath
+  if (!path.isAbsolute(dbPath)) {
+    dbPath = path.resolve(process.cwd(), dbPath)
+  }
+  console.log('saveDatabase called, dbPath:', dbPath)
   const data = db.export()
   const buffer = Buffer.from(data)
   fs.writeFileSync(dbPath, buffer)

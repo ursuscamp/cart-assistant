@@ -25,7 +25,7 @@
     <!-- Lists Grid -->
     <div v-if="listsStore.lists.length > 0" class="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
       <div
-        v-for="list in listsStore.lists"
+        v-for="list in sortedLists"
         :key="list.id"
         class="card hover:border-forest-600/50 transition-all duration-300 group"
       >
@@ -285,6 +285,13 @@ onMounted(async () => {
       listIngredientsCache.value.set(list.id, fullList.ingredients || [])
     }
   }
+})
+
+const sortedLists = computed(() => {
+  return [...listsStore.lists].sort((a, b) => {
+    if (a.is_regular_items === b.is_regular_items) return a.name.localeCompare(b.name)
+    return a.is_regular_items ? -1 : 1
+  })
 })
 
 function getPreviewIngredients(listId: number) {

@@ -117,6 +117,11 @@ export const useGroceryStore = defineStore('grocery', {
     async deleteList(id: number) {
       await $fetch(`/api/grocery-lists/${id}`, { method: 'DELETE' })
       this.lists = this.lists.filter(l => l.id !== id)
+    },
+
+    async deleteItem(listId: number, itemId: number) {
+      await $fetch(`/api/grocery-lists/${listId}/items/${itemId}`, { method: 'DELETE' })
+      await this.fetchList(listId)
     }
   }
 })

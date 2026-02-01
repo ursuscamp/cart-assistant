@@ -29,7 +29,7 @@
 
           <div v-if="listsStore.lists.length > 0" class="space-y-2 max-h-80 overflow-y-auto scrollbar-thin">
             <label
-              v-for="list in listsStore.lists"
+              v-for="list in sortedLists"
               :key="list.id"
               :class="[
                 'flex items-center justify-between p-3 rounded-lg border transition-all duration-200 cursor-pointer',
@@ -194,6 +194,13 @@ onMounted(async () => {
     listsStore.fetchLists(),
     groceryStore.fetchLists()
   ])
+})
+
+const sortedLists = computed(() => {
+  return [...listsStore.lists].sort((a, b) => {
+    if (a.is_regular_items === b.is_regular_items) return a.name.localeCompare(b.name)
+    return a.is_regular_items ? -1 : 1
+  })
 })
 
 async function createGroceryList() {
