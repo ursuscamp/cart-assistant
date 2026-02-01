@@ -51,9 +51,15 @@
     <!-- Sections -->
     <div class="space-y-4">
       <div
-        v-for="section in groceryStore.currentList.sections"
+        v-for="(section, index) in sortedSections"
         :key="section.id"
-        class="card overflow-hidden"
+        class="card overflow-hidden cursor-move"
+        :class="{ 'ring-2 ring-forest-500': draggedSectionIndex === section.originalIndex }"
+        draggable="true"
+        @dragstart="onDragStart(section.originalIndex, $event)"
+        @dragover.prevent="onDragOver(section.originalIndex, $event)"
+        @drop="onDrop(section.originalIndex, $event)"
+        @dragend="onDragEnd"
       >
         <div class="section-header">
           <div class="flex items-center gap-3">
@@ -67,30 +73,30 @@
           </div>
         </div>
         <div v-if="section.items.length > 0" class="divide-y divide-bark-800">
-          <label
-            v-for="item in section.items"
-            :key="item.id"
-            :class="[
-              'flex items-center gap-4 px-4 py-3 transition-all duration-200',
-              item.is_checked ? 'bg-bark-900/30' : 'hover:bg-bark-800/30'
-            ]"
-          >
-            <Checkbox v-model="item.is_checked" @change="toggleItem(item)" />
-            <span :class="[
-              'flex-1 transition-all',
-              item.is_checked ? 'text-bark-500 line-through' : 'text-white'
-            ]">
-              {{ item.ingredient_name }}
-            </span>
-            <button
-              @click="removeItem(item)"
-              class="p-1.5 rounded-lg text-bark-500 hover:text-red-400 hover:bg-red-900/20 transition-colors"
+          <template v-for="item in sortedSectionItems(section.items)" :key="item.id">
+            <label
+              :class="[
+                'flex items-center gap-4 px-4 py-3 transition-all duration-200',
+                item.is_checked ? 'bg-bark-900/30' : 'hover:bg-bark-800/30'
+              ]"
             >
-              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-              </svg>
-            </button>
-          </label>
+              <Checkbox v-model="item.is_checked" @change="toggleItem(item)" />
+              <span :class="[
+                'flex-1 transition-all',
+                item.is_checked ? 'text-bark-500 line-through' : 'text-white'
+              ]">
+                {{ item.ingredient_name }}
+              </span>
+              <button
+                @click="removeItem(item)"
+                class="p-1.5 rounded-lg text-bark-500 hover:text-red-400 hover:bg-red-900/20 transition-colors"
+              >
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </label>
+          </template>
         </div>
         <div v-else class="px-4 py-8 text-center text-bark-500">
           No items in this section
@@ -187,6 +193,8 @@ const showAddItemModal = ref(false)
 const showAddSourceModal = ref(false)
 const newItemName = ref('')
 const selectedSourceList = ref<string | number>('')
+const draggedSectionIndex = ref<number | null>(null)
+const draggedSectionOrder = ref<number[]>([])
 
 const totalCount = computed(() => {
   return groceryStore.currentList?.sections?.reduce((sum, s) => sum + s.items.length, 0) || 0
@@ -205,6 +213,16 @@ const progress = computed(() => {
 const availableLists = computed(() => {
   const currentSourceIds = groceryStore.currentList?.sources?.map(s => s.id) || []
   return listsStore.lists.filter(l => !currentSourceIds.includes(l.id))
+})
+
+const sortedSections = computed(() => {
+  if (!groceryStore.currentList?.sections) return []
+  
+  const sections = groceryStore.currentList.sections.map((s, i) => ({ ...s, originalIndex: i }))
+  const uncompleted = sections.filter(s => s.items.some(i => !i.is_checked))
+  const completed = sections.filter(s => s.items.length > 0 && s.items.every(i => i.is_checked))
+  
+  return [...uncompleted, ...completed]
 })
 
 onMounted(async () => {
@@ -241,5 +259,49 @@ async function removeItem(item: GroceryItem) {
   if (groceryStore.currentList) {
     await groceryStore.updateItem(groceryStore.currentList.id, item.id, { is_checked: item.is_checked } as any)
   }
+}
+
+function sortedSectionItems(items: GroceryItem[]) {
+  return [...items].sort((a, b) => {
+    if (a.is_checked === b.is_checked) return 0
+    return a.is_checked ? 1 : -1
+  })
+}
+
+function onDragStart(index: number, event: DragEvent) {
+  draggedSectionIndex.value = index
+  draggedSectionOrder.value = groceryStore.currentList!.sections.map(s => s.id)
+  if (event.dataTransfer) {
+    event.dataTransfer.effectAllowed = 'move'
+    event.dataTransfer.setData('text/plain', String(index))
+  }
+}
+
+function onDragOver(index: number, event: DragEvent) {
+  if (event.dataTransfer) {
+    event.dataTransfer.dropEffect = 'move'
+  }
+}
+
+async function onDrop(targetIndex: number, event: DragEvent) {
+  event.preventDefault()
+  if (draggedSectionIndex.value === null || draggedSectionIndex.value === targetIndex) {
+    onDragEnd()
+    return
+  }
+
+  const sections = [...groceryStore.currentList!.sections]
+  const [movedSection] = sections.splice(draggedSectionIndex.value, 1)
+  sections.splice(targetIndex, 0, movedSection)
+  
+  const order = sections.map(s => s.id)
+  await groceryStore.reorderSections(groceryStore.currentList!.id, order)
+  
+  onDragEnd()
+}
+
+function onDragEnd() {
+  draggedSectionIndex.value = null
+  draggedSectionOrder.value = []
 }
 </script>

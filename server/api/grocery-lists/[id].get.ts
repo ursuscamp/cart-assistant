@@ -14,7 +14,12 @@ export default defineEventHandler(async (event) => {
   const groceryList: any = {}
   columns.forEach((col, i) => { groceryList[col] = values[i] })
 
-  const sectionsResult = db.exec('SELECT * FROM sections ORDER BY display_order')
+  const sectionsResult = db.exec(`
+    SELECT s.*, glso.display_order as custom_order
+    FROM sections s
+    LEFT JOIN grocery_list_section_orders glso ON s.id = glso.section_id AND glso.grocery_list_id = ?
+    ORDER BY COALESCE(glso.display_order, s.display_order)
+  `, [id])
   const sections = sectionsResult.length > 0 ? sectionsResult[0].values.map(row => {
     const obj: any = {}
     sectionsResult[0].columns.forEach((col, i) => { obj[col] = row[i] })

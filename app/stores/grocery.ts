@@ -104,6 +104,19 @@ export const useGroceryStore = defineStore('grocery', {
 
     async toggleChecked(listId: number, itemId: number, isChecked: boolean) {
       await this.updateItem(listId, itemId, { is_checked: isChecked })
+    },
+
+    async reorderSections(listId: number, sectionIds: number[]) {
+      await $fetch(`/api/grocery-lists/${listId}/reorder-sections`, {
+        method: 'POST',
+        body: { sectionIds }
+      })
+      await this.fetchList(listId)
+    },
+
+    async deleteList(id: number) {
+      await $fetch(`/api/grocery-lists/${id}`, { method: 'DELETE' })
+      this.lists = this.lists.filter(l => l.id !== id)
     }
   }
 })

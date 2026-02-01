@@ -136,6 +136,17 @@ export function runMigrations() {
     )
   `)
 
+  db.run(`
+    CREATE TABLE IF NOT EXISTS grocery_list_section_orders (
+      grocery_list_id INTEGER NOT NULL,
+      section_id INTEGER NOT NULL,
+      display_order INTEGER NOT NULL DEFAULT 0,
+      PRIMARY KEY (grocery_list_id, section_id),
+      FOREIGN KEY (grocery_list_id) REFERENCES grocery_lists(id) ON DELETE CASCADE,
+      FOREIGN KEY (section_id) REFERENCES sections(id) ON DELETE CASCADE
+    )
+  `)
+
   seedDefaultSections()
   saveDatabase()
 }
