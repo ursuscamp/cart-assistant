@@ -90,16 +90,27 @@
         </div>
         <div class="card-body">
           <p class="text-sm text-bark-400 mb-4">Manually overridden item-section assignments. These take precedence over LLM suggestions.</p>
+          <div class="flex gap-3 mb-4">
+            <input v-model="newMappingItem" type="text" class="input-field flex-1" placeholder="Item name (e.g., 'apples')" @keyup.enter="createMapping" />
+            <select v-model="newMappingSection" class="bg-bark-800 border border-bark-700 text-white text-sm rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-forest-500">
+              <option value="">Section</option>
+              <option v-for="section in sectionsStore.sections" :key="section.id" :value="section.id">{{ section.name }}</option>
+            </select>
+            <button @click="createMapping" :disabled="!newMappingItem.trim() || !newMappingSection" class="btn-primary">Add</button>
+          </div>
           <input v-model="mappingSearch" type="text" class="input-field mb-4" placeholder="Search items..." />
           <div v-if="filteredMappings.length > 0" class="space-y-2 max-h-64 overflow-y-auto scrollbar-thin">
             <div v-for="mapping in filteredMappings" :key="mapping.item_name" class="flex items-center justify-between p-3 rounded-lg bg-bark-900/50 border border-bark-800">
-              <div>
-                <p class="font-medium text-white">{{ mapping.item_name }}</p>
+              <div class="flex-1 min-w-0 mr-3">
+                <p class="font-medium text-white truncate">{{ mapping.item_name }}</p>
                 <span :class="['text-xs px-2 py-0.5 rounded-full', mapping.is_manual_override ? 'bg-forest-600/30 text-forest-300' : 'bg-bark-700 text-bark-400']">
                   {{ mapping.section_name }}
                 </span>
               </div>
-              <button @click="deleteMapping(mapping.item_name)" class="p-1.5 rounded-lg text-bark-400 hover:text-red-400 hover:bg-red-900/20">
+              <select :value="mapping.section_id" @change="updateMapping(mapping.item_name, Number($event.target.value))" class="bg-bark-800 border border-bark-700 text-white text-sm rounded-lg px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-forest-500 w-32">
+                <option v-for="section in sectionsStore.sections" :key="section.id" :value="section.id">{{ section.name }}</option>
+              </select>
+              <button @click="deleteMapping(mapping.item_name)" class="p-1.5 rounded-lg text-bark-400 hover:text-red-400 hover:bg-red-900/20 ml-2">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                 </svg>
@@ -170,6 +181,8 @@ const openrouterModel = config.openrouterModel
 
 const mappings = ref<Array<{ item_name: string; section_id: number; section_name: string; is_manual_override: number }>>([])
 const mappingSearch = ref('')
+const newMappingItem = ref('')
+const newMappingSection = ref<number | ''>('')
 
 const showAddSectionModal = ref(false)
 const editingSection = ref<Section | null>(null)
@@ -187,6 +200,35 @@ onMounted(async () => {
 
 async function fetchMappings() {
   mappings.value = await $fetch('/api/mappings')
+}
+
+async function createMapping() {
+  if (!newMappingItem.value.trim() || !newMappingSection.value) return
+  try {
+    await $fetch('/api/mappings', {
+      method: 'POST',
+      body: { item_name: newMappingItem.value.trim(), section_id: newMappingSection.value, is_manual_override: true }
+    })
+    await fetchMappings()
+    newMappingItem.value = ''
+    newMappingSection.value = ''
+    toast.success('Mapping created')
+  } catch (error) {
+    toast.error('Failed to create mapping')
+  }
+}
+
+async function updateMapping(itemName: string, sectionId: number) {
+  try {
+    await $fetch(`/api/mappings/${encodeURIComponent(itemName)}`, {
+      method: 'PUT',
+      body: { section_id: sectionId, is_manual_override: true }
+    })
+    await fetchMappings()
+    toast.success('Mapping updated')
+  } catch (error) {
+    toast.error('Failed to update mapping')
+  }
 }
 
 async function deleteMapping(itemName: string) {
@@ -302,15 +344,5 @@ async function moveDown(sectionId: number) {
   const [movedSection] = sections.splice(index, 1)
   sections.splice(index + 1, 0, movedSection)
   await sectionsStore.reorderSections(sections.map(s => s.id))
-}
-
-async function updateMapping(itemName: string, sectionId: number) {
-  try {
-    await $fetch(`/api/mappings/${encodeURIComponent(itemName)}`, { method: 'PUT', body: { section_id: sectionId } })
-    await fetchMappings()
-    toast.success('Mapping updated')
-  } catch (error) {
-    toast.error('Failed to update mapping')
-  }
 }
 </script>

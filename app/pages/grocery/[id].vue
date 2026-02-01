@@ -74,19 +74,26 @@
         </div>
         <div v-if="section.items.length > 0" class="divide-y divide-bark-800">
           <template v-for="item in sortedSectionItems(section.items)" :key="item.id">
-            <label
+            <div
               :class="[
-                'flex items-center gap-4 px-4 py-3 transition-all duration-200',
+                'flex items-center gap-3 px-4 py-3 transition-all duration-200',
                 item.is_checked ? 'bg-bark-900/30' : 'hover:bg-bark-800/30'
               ]"
             >
               <Checkbox v-model="item.is_checked" @change="toggleItem(item)" />
               <span :class="[
-                'flex-1 transition-all',
+                'flex-1 transition-all truncate',
                 item.is_checked ? 'text-bark-500 line-through' : 'text-white'
               ]">
                 {{ item.ingredient_name }}
               </span>
+              <select
+                :value="item.section_id || 0"
+                @change="changeItemSection(item, Number($event.target.value))"
+                class="bg-bark-800 border border-bark-700 text-white text-xs rounded-lg px-2 py-1.5 focus:outline-none focus:ring-1 focus:ring-forest-500 w-28"
+              >
+                <option v-for="s in allSections" :key="s.id" :value="s.id">{{ s.name }}</option>
+              </select>
               <button
                 @click="removeItem(item)"
                 class="p-1.5 rounded-lg text-bark-500 hover:text-red-400 hover:bg-red-900/20 transition-colors"
@@ -95,7 +102,7 @@
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
                 </svg>
               </button>
-            </label>
+            </div>
           </template>
         </div>
         <div v-else class="px-4 py-8 text-center text-bark-500">
@@ -181,12 +188,14 @@
 <script setup lang="ts">
 import { useGroceryStore, type GroceryItem } from '~/stores/grocery'
 import { useListsStore } from '~/stores/lists'
+import { useSectionsStore } from '~/stores/sections'
 import Modal from '~/components/Modal.vue'
 import Checkbox from '~/components/Checkbox.vue'
 
 const route = useRoute()
 const groceryStore = useGroceryStore()
 const listsStore = useListsStore()
+const sectionsStore = useSectionsStore()
 const toast = useToast()
 
 const showAddItemModal = ref(false)
@@ -215,6 +224,10 @@ const availableLists = computed(() => {
   return listsStore.lists.filter(l => !currentSourceIds.includes(l.id))
 })
 
+const allSections = computed(() => {
+  return sectionsStore.sections
+})
+
 const sortedSections = computed(() => {
   if (!groceryStore.currentList?.sections) return []
   
@@ -229,7 +242,8 @@ onMounted(async () => {
   const id = Number(route.params.id)
   await Promise.all([
     groceryStore.fetchList(id),
-    listsStore.fetchLists()
+    listsStore.fetchLists(),
+    sectionsStore.fetchSections()
   ])
 })
 
@@ -260,6 +274,12 @@ async function removeItem(item: GroceryItem) {
     await groceryStore.deleteItem(groceryStore.currentList.id, item.id)
     toast.success('Item removed')
   }
+}
+
+async function changeItemSection(item: GroceryItem, newSectionId: number) {
+  if (!groceryStore.currentList || item.section_id === newSectionId) return
+  await groceryStore.updateItem(groceryStore.currentList.id, item.id, { section_id: newSectionId, is_manual_override: true })
+  toast.success('Section updated')
 }
 
 function sortedSectionItems(items: GroceryItem[]) {
