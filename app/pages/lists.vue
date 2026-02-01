@@ -1,14 +1,17 @@
 <template>
   <div>
-    <v-row>
-      <v-col cols="12" class="d-flex align-center justify-space-between">
-        <h1 class="text-h4">Lists</h1>
+    <v-row class="mb-4">
+      <v-col cols="12" class="d-flex align-center justify-space-between flex-wrap">
+        <h1 class="text-h4 font-weight-bold text-primary">
+          <v-icon class="mr-2" color="primary">mdi-format-list-bulleted</v-icon>
+          Lists
+        </h1>
         <div>
-          <v-btn color="secondary" class="mr-2" @click="showImportDialog = true">
+          <v-btn color="secondary" class="mr-2" @click="showImportDialog = true" elevation="2">
             <v-icon left>mdi-import</v-icon>
             Import Text
           </v-btn>
-          <v-btn color="primary" @click="openCreateDialog">
+          <v-btn color="primary" @click="openCreateDialog" elevation="2">
             <v-icon left>mdi-plus</v-icon>
             New List
           </v-btn>
@@ -18,32 +21,49 @@
 
     <v-row>
       <v-col v-for="list in listsStore.lists" :key="list.id" cols="12" sm="6" md="4">
-        <v-card :to="`/lists/${list.id}`" hover>
-          <v-card-title class="d-flex align-center">
+        <v-card hover :to="`/lists/${list.id}`" class="h-100">
+          <v-card-title class="d-flex align-center bg-primary text-white">
+            <v-icon class="mr-2">mdi-food</v-icon>
             {{ list.name }}
-            <v-chip v-if="list.is_regular_items" size="small" color="info" class="ml-2">
+            <v-chip v-if="list.is_regular_items" size="small" class="ml-2" color="white" variant="tonal">
               Regular Items
             </v-chip>
           </v-card-title>
-          <v-card-subtitle>
-            {{ list.ingredient_count || 0 }} ingredients
-          </v-card-subtitle>
-          <v-card-text>
-            <v-chip
-              v-for="ing in getPreviewIngredients(list.id)"
-              :key="ing.id"
-              size="small"
-              class="mr-1 mb-1"
-            >
-              {{ ing.name }}
-            </v-chip>
+          <v-card-text class="pt-4">
+            <div class="d-flex align-center mb-3">
+              <v-icon size="small" color="secondary" class="mr-1">mdi-package-variant</v-icon>
+              <span class="text-body-2 text-medium-emphasis">
+                {{ list.ingredient_count || 0 }} ingredients
+              </span>
+            </div>
+            <div class="d-flex flex-wrap gap-1">
+              <v-chip
+                v-for="ing in getPreviewIngredients(list.id)"
+                :key="ing.id"
+                size="small"
+                color="secondary"
+                variant="tonal"
+                class="mr-1 mb-1"
+              >
+                {{ ing.name }}
+              </v-chip>
+              <v-chip
+                v-if="(list.ingredient_count || 0) > 5"
+                size="small"
+                color="grey"
+                variant="tonal"
+                class="mr-1 mb-1"
+              >
+                +{{ (list.ingredient_count || 0) - 5 }} more
+              </v-chip>
+            </div>
           </v-card-text>
           <v-card-actions>
             <v-spacer></v-spacer>
-            <v-btn icon size="small" @click.prevent="openEditDialog(list)">
+            <v-btn icon size="small" variant="text" color="primary" @click.prevent="openEditDialog(list)">
               <v-icon>mdi-pencil</v-icon>
             </v-btn>
-            <v-btn icon size="small" color="error" @click.prevent="confirmDelete(list)">
+            <v-btn icon size="small" variant="text" color="error" @click.prevent="confirmDelete(list)">
               <v-icon>mdi-delete</v-icon>
             </v-btn>
           </v-card-actions>
@@ -56,36 +76,50 @@
       icon="mdi-format-list-bulleted"
       title="No lists yet"
       text="Create your first dish or recipe list"
+      class="mt-8"
     >
       <template v-slot:actions>
-        <v-btn color="primary" @click="openCreateDialog">Create List</v-btn>
+        <v-btn color="primary" size="large" @click="openCreateDialog" elevation="2">
+          <v-icon left>mdi-plus</v-icon>
+          Create List
+        </v-btn>
       </template>
     </v-empty-state>
 
-    <v-dialog v-model="showListDialog" max-width="600">
+    <v-dialog v-model="showListDialog" max-width="600" persistent>
       <v-card>
-        <v-card-title>{{ editingList ? 'Edit List' : 'New List' }}</v-card-title>
-        <v-card-text>
+        <v-card-title class="bg-primary text-white">
+          <v-icon class="mr-2">{{ editingList ? 'mdi-pencil' : 'mdi-plus' }}</v-icon>
+          {{ editingList ? 'Edit List' : 'New List' }}
+        </v-card-title>
+        <v-card-text class="pt-4">
           <v-text-field
             v-model="listForm.name"
             label="List name"
             :rules="[v => !!v || 'Name is required']"
+            color="primary"
+            class="mb-4"
           ></v-text-field>
           <v-checkbox
             v-model="listForm.is_regular_items"
             label="Regular items list"
             hint="This list will appear at the top when creating grocery lists"
             persistent-hint
+            color="primary"
           ></v-checkbox>
           <v-divider class="my-4"></v-divider>
-          <h4 class="mb-2">Ingredients</h4>
-          <v-row v-for="(ing, index) in listForm.ingredients" :key="index" align="center">
+          <div class="d-flex align-center mb-2">
+            <v-icon color="secondary" class="mr-2">mdi-food</v-icon>
+            <h4 class="text-h6">Ingredients</h4>
+          </div>
+          <v-row v-for="(ing, index) in listForm.ingredients" :key="index" align="center" class="mb-2">
             <v-col cols="5">
               <v-text-field
                 v-model="ing.name"
                 label="Item"
                 density="compact"
                 hide-details
+                color="primary"
               ></v-text-field>
             </v-col>
             <v-col cols="4">
@@ -94,76 +128,113 @@
                 label="Qty"
                 density="compact"
                 hide-details
+                color="primary"
               ></v-text-field>
             </v-col>
             <v-col cols="3">
-              <v-btn icon size="small" color="error" @click="removeIngredient(index)">
+              <v-btn icon size="small" color="error" variant="text" @click="removeIngredient(index)">
                 <v-icon>mdi-close</v-icon>
               </v-btn>
             </v-col>
           </v-row>
-          <v-btn variant="text" color="primary" @click="addIngredient">
+          <v-btn variant="text" color="primary" @click="addIngredient" class="mt-2">
             <v-icon left>mdi-plus</v-icon>
             Add Ingredient
           </v-btn>
         </v-card-text>
-        <v-card-actions>
+        <v-card-actions class="pa-4">
           <v-spacer></v-spacer>
-          <v-btn @click="showListDialog = false">Cancel</v-btn>
-          <v-btn color="primary" @click="saveList">Save</v-btn>
+          <v-btn @click="showListDialog = false" variant="text">Cancel</v-btn>
+          <v-btn color="primary" @click="saveList" elevation="2">
+            <v-icon left>mdi-check</v-icon>
+            Save
+          </v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>
 
     <v-dialog v-model="showImportDialog" max-width="700">
       <v-card>
-        <v-card-title>Import Lists from Text</v-card-title>
-        <v-card-text>
+        <v-card-title class="bg-secondary text-white">
+          <v-icon class="mr-2">mdi-import</v-icon>
+          Import Lists from Text
+        </v-card-title>
+        <v-card-text class="pt-4">
           <v-textarea
             v-model="importText"
             label="Paste your lists here"
             rows="8"
             placeholder="SPAGHETTI:&#10;1 lb ground beef&#10;1 jar marinara sauce&#10;&#10;TACOS:&#10;1 lb ground beef&#10;Taco shells"
+            color="primary"
           ></v-textarea>
           <v-btn
             color="primary"
+            block
+            size="large"
             :loading="importing"
             :disabled="!importText.trim()"
             @click="previewImport"
+            class="mt-4"
+            elevation="2"
           >
+            <v-icon left>mdi-eye</v-icon>
             Preview Import
           </v-btn>
           <v-expand-transition>
             <div v-if="importPreview.length > 0" class="mt-4">
-              <h4 class="mb-2">Preview</h4>
+              <v-divider class="mb-4"></v-divider>
+              <h4 class="text-h6 mb-3">
+                <v-icon color="primary" class="mr-2">mdi-check-circle</v-icon>
+                Preview
+              </h4>
               <v-card
                 v-for="(list, index) in importPreview"
                 :key="index"
                 variant="outlined"
-                class="mb-2"
+                class="mb-3"
               >
                 <v-card-text>
                   <v-checkbox
                     v-model="list.selected"
                     :label="list.name"
                     hide-details
+                    color="primary"
                   ></v-checkbox>
-                  <div class="ml-8 text-caption">
-                    {{ list.ingredients.map(i => i.name).join(', ') }}
+                  <div class="ml-8 mt-2">
+                    <v-chip
+                      v-for="ing in list.ingredients.slice(0, 10)"
+                      :key="ing.name"
+                      size="small"
+                      color="secondary"
+                      variant="tonal"
+                      class="mr-1 mb-1"
+                    >
+                      {{ ing.name }} {{ ing.quantity ? `(${ing.quantity})` : '' }}
+                    </v-chip>
+                    <v-chip
+                      v-if="list.ingredients.length > 10"
+                      size="small"
+                      color="grey"
+                      variant="tonal"
+                    >
+                      +{{ list.ingredients.length - 10 }} more
+                    </v-chip>
                   </div>
                 </v-card-text>
               </v-card>
             </div>
           </v-expand-transition>
         </v-card-text>
-        <v-card-actions>
+        <v-card-actions class="pa-4">
           <v-spacer></v-spacer>
-          <v-btn @click="showImportDialog = false">Cancel</v-btn>
+          <v-btn @click="showImportDialog = false" variant="text">Cancel</v-btn>
           <v-btn
             color="primary"
             :disabled="importPreview.filter(l => l.selected).length === 0"
             @click="confirmImport"
+            elevation="2"
           >
+            <v-icon left>mdi-check</v-icon>
             Import Selected
           </v-btn>
         </v-card-actions>
@@ -172,14 +243,20 @@
 
     <v-dialog v-model="showDeleteDialog" max-width="400">
       <v-card>
-        <v-card-title>Delete List</v-card-title>
-        <v-card-text>
+        <v-card-title class="bg-error text-white">
+          <v-icon class="mr-2">mdi-alert</v-icon>
+          Delete List
+        </v-card-title>
+        <v-card-text class="pt-4">
           Are you sure you want to delete "{{ deletingList?.name }}"? This action cannot be undone.
         </v-card-text>
-        <v-card-actions>
+        <v-card-actions class="pa-4">
           <v-spacer></v-spacer>
           <v-btn @click="showDeleteDialog = false">Cancel</v-btn>
-          <v-btn color="error" @click="deleteList">Delete</v-btn>
+          <v-btn color="error" @click="deleteList" elevation="2">
+            <v-icon left>mdi-delete</v-icon>
+            Delete
+          </v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>
@@ -256,12 +333,12 @@ async function saveList() {
     if (editingList.value) {
       await listsStore.updateList(editingList.value.id, listForm.name, listForm.is_regular_items, ingredients)
       snackbar.show = true
-      snackbar.message = 'List updated'
+      snackbar.message = 'List updated successfully'
       snackbar.color = 'success'
     } else {
       await listsStore.createList(listForm.name, listForm.is_regular_items, ingredients)
       snackbar.show = true
-      snackbar.message = 'List created'
+      snackbar.message = 'List created successfully'
       snackbar.color = 'success'
     }
     showListDialog.value = false
