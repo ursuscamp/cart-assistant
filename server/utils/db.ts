@@ -1,7 +1,6 @@
 import initSqlJs, { Database } from 'sql.js'
 import * as path from 'path'
 import * as fs from 'fs'
-import { fileURLToPath } from 'url'
 
 let db: Database | null = null
 let sqlJs: any = null
@@ -26,7 +25,10 @@ export async function getDatabase(): Promise<Database> {
   await getSqlJs()
 
   const config = useRuntimeConfig()
-  const dbPath = config.public.databasePath
+  let dbPath = config.public.databasePath
+  if (!path.isAbsolute(dbPath)) {
+    dbPath = path.resolve(process.cwd(), dbPath)
+  }
 
   fs.mkdirSync(path.dirname(dbPath), { recursive: true })
 
@@ -44,12 +46,13 @@ export async function getDatabase(): Promise<Database> {
 
 export async function saveDatabase() {
   if (!db) return
+  
   const config = useRuntimeConfig()
   let dbPath = config.public.databasePath
   if (!path.isAbsolute(dbPath)) {
     dbPath = path.resolve(process.cwd(), dbPath)
   }
-  console.log('saveDatabase called, dbPath:', dbPath)
+  
   const data = db.export()
   const buffer = Buffer.from(data)
   fs.writeFileSync(dbPath, buffer)
