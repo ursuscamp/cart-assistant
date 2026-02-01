@@ -1,195 +1,192 @@
 <template>
-  <div v-if="groceryStore.currentList">
-    <v-row>
-      <v-col cols="12" class="d-flex align-center justify-space-between flex-wrap">
-        <div class="d-flex align-center">
-          <v-btn icon variant="text" to="/grocery" class="mr-2">
-            <v-icon>mdi-arrow-back</v-icon>
-          </v-btn>
-          <v-edit-dialog
-            :model-value="groceryStore.currentList.name"
-            @save="updateName"
-          >
-            <template v-slot:default>
-              <span class="text-h4 cursor-pointer">{{ groceryStore.currentList.name }}</span>
-            </template>
-            <template v-slot:input>
-              <v-text-field v-model="editName" label="Edit name"></v-text-field>
-            </template>
-          </v-edit-dialog>
+  <div v-if="groceryStore.currentList" class="max-w-5xl mx-auto space-y-6">
+    <!-- Header -->
+    <div class="flex items-center justify-between">
+      <div class="flex items-center gap-4">
+        <NuxtLink to="/grocery" class="p-2 rounded-lg text-bark-400 hover:text-white hover:bg-bark-800 transition-colors">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+          </svg>
+        </NuxtLink>
+        <div>
+          <h1 class="text-2xl font-bold text-white">{{ groceryStore.currentList.name }}</h1>
+          <p class="text-sm text-bark-400">{{ groceryStore.currentList.week_of }}</p>
         </div>
-        <div class="d-flex align-center ga-2">
-          <v-chip v-if="progress > 0" color="success" size="small">
-            {{ progress.toFixed(0) }}% complete
-          </v-chip>
-          <v-btn variant="outlined" size="small" @click="showAddItemDialog = true">
-            <v-icon left>mdi-plus</v-icon>
-            Add Item
-          </v-btn>
-          <v-btn variant="outlined" size="small" @click="showAddSourceDialog = true">
-            <v-icon left>mdi-link-plus</v-icon>
-            Add List
-          </v-btn>
-        </div>
-      </v-col>
-    </v-row>
+      </div>
+      <div class="flex items-center gap-3">
+        <button @click="showAddItemModal = true" class="btn-secondary">
+          <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+          </svg>
+          Add Item
+        </button>
+        <button @click="showAddSourceModal = true" class="btn-secondary">
+          <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
+          </svg>
+          Add List
+        </button>
+      </div>
+    </div>
 
-    <v-row>
-      <v-col cols="12" md="8">
-        <v-card v-for="section in groceryStore.currentList.sections" :key="section.id" class="mb-4">
-          <v-card-title class="d-flex align-center bg-grey-lighten-4">
-            {{ section.name }}
-            <v-chip size="x-small" class="ml-2">{{ section.items.length }}</v-chip>
-          </v-card-title>
-          <v-card-text class="pa-0">
-            <draggable
-              v-model="section.items"
-              :group="{ name: 'items', pull: true, put: true }"
-              item-key="id"
-              @end="onDragEnd"
-            >
-              <template #item="{ element }">
-                <v-list-item
-                  :class="{ 'bg-grey-lighten-4': element.is_checked }"
-                  class="cursor-move"
-                >
-                  <template v-slot:prepend>
-                    <v-checkbox
-                      :model-value="element.is_checked"
-                      hide-details
-                      @update:model-value="toggleChecked(element)"
-                    ></v-checkbox>
-                  </template>
-                  <v-list-item-title :class="{ 'text-decoration-line-through text-grey': element.is_checked }">
-                    {{ element.ingredient_name }}
-                  </v-list-item-title>
-                  <template v-slot:append>
-                    <v-btn icon size="x-small" variant="text" @click="removeItem(element)">
-                      <v-icon size="small">mdi-close</v-icon>
-                    </v-btn>
-                  </template>
-                </v-list-item>
-              </template>
-            </draggable>
-            <div v-if="section.items.length === 0" class="pa-4 text-center text-grey">
-              No items
+    <!-- Progress -->
+    <div class="card">
+      <div class="card-body">
+        <div class="flex items-center justify-between mb-3">
+          <span class="text-sm font-medium text-bark-300">Shopping Progress</span>
+          <span class="text-sm font-semibold text-forest-400">{{ checkedCount }} / {{ totalCount }} items</span>
+        </div>
+        <div class="h-3 bg-bark-800 rounded-full overflow-hidden">
+          <div
+            class="h-full bg-gradient-to-r from-forest-600 to-moss-500 transition-all duration-500"
+            :style="{ width: `${progress}%` }"
+          ></div>
+        </div>
+        <p v-if="progress === 100" class="text-center text-forest-400 font-medium mt-3">
+          All items checked! Great job!
+        </p>
+      </div>
+    </div>
+
+    <!-- Sections -->
+    <div class="space-y-4">
+      <div
+        v-for="section in groceryStore.currentList.sections"
+        :key="section.id"
+        class="card overflow-hidden"
+      >
+        <div class="section-header">
+          <div class="flex items-center gap-3">
+            <div class="w-8 h-8 rounded-lg bg-forest-600/20 flex items-center justify-center">
+              <svg class="w-4 h-4 text-forest-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+              </svg>
             </div>
-          </v-card-text>
-        </v-card>
-
-        <v-card v-if="groceryStore.currentList.uncategorized?.length">
-          <v-card-title class="bg-grey-lighten-4">Uncategorized</v-card-title>
-          <v-card-text class="pa-0">
-            <v-list-item v-for="item in groceryStore.currentList.uncategorized" :key="item.id">
-              <template v-slot:prepend>
-                <v-checkbox :model-value="item.is_checked" hide-details @update:model-value="toggleChecked(item)"></v-checkbox>
-              </template>
-              <v-list-item-title>{{ item.ingredient_name }}</v-list-item-title>
-            </v-list-item>
-          </v-card-text>
-        </v-card>
-      </v-col>
-
-      <v-col cols="12" md="4">
-        <v-card>
-          <v-card-title>Sources</v-card-title>
-          <v-card-text>
-            <v-chip
-              v-for="source in groceryStore.currentList.sources"
-              :key="source.id"
-              class="ma-1"
-              size="small"
-              closable
-              @click:close="removeSource(source.id)"
+            <h3 class="font-semibold text-white">{{ section.name }}</h3>
+            <span class="badge">{{ section.items.length }}</span>
+          </div>
+        </div>
+        <div v-if="section.items.length > 0" class="divide-y divide-bark-800">
+          <label
+            v-for="item in section.items"
+            :key="item.id"
+            :class="[
+              'flex items-center gap-4 px-4 py-3 transition-all duration-200',
+              item.is_checked ? 'bg-bark-900/30' : 'hover:bg-bark-800/30'
+            ]"
+          >
+            <Checkbox v-model="item.is_checked" @change="toggleItem(item)" />
+            <span :class="[
+              'flex-1 transition-all',
+              item.is_checked ? 'text-bark-500 line-through' : 'text-white'
+            ]">
+              {{ item.ingredient_name }}
+            </span>
+            <button
+              @click="removeItem(item)"
+              class="p-1.5 rounded-lg text-bark-500 hover:text-red-400 hover:bg-red-900/20 transition-colors"
             >
-              {{ source.name }}
-            </v-chip>
-            <p v-if="!groceryStore.currentList.sources.length" class="text-grey">No sources</p>
-          </v-card-text>
-        </v-card>
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          </label>
+        </div>
+        <div v-else class="px-4 py-8 text-center text-bark-500">
+          No items in this section
+        </div>
+      </div>
 
-        <v-card class="mt-4">
-          <v-card-title>Progress</v-card-title>
-          <v-card-text>
-            <v-progress-linear
-              :model-value="progress"
-              color="success"
-              height="20"
-              rounded
-            >
-              <template v-slot:default>
-                <strong>{{ checkedCount }} / {{ totalCount }}</strong>
-              </template>
-            </v-progress-linear>
-          </v-card-text>
-        </v-card>
-      </v-col>
-    </v-row>
+      <!-- Uncategorized -->
+      <div v-if="groceryStore.currentList.uncategorized?.length" class="card overflow-hidden">
+        <div class="section-header">
+          <div class="flex items-center gap-3">
+            <div class="w-8 h-8 rounded-lg bg-yellow-600/20 flex items-center justify-center">
+              <svg class="w-4 h-4 text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+              </svg>
+            </div>
+            <h3 class="font-semibold text-white">Uncategorized</h3>
+            <span class="badge bg-yellow-600">{{ groceryStore.currentList.uncategorized.length }}</span>
+          </div>
+        </div>
+        <div class="divide-y divide-bark-800">
+          <label
+            v-for="item in groceryStore.currentList.uncategorized"
+            :key="item.id"
+            :class="[
+              'flex items-center gap-4 px-4 py-3 transition-all duration-200',
+              item.is_checked ? 'bg-bark-900/30' : 'hover:bg-bark-800/30'
+            ]"
+          >
+            <Checkbox v-model="item.is_checked" @change="toggleItem(item)" />
+            <span :class="[
+              'flex-1 transition-all',
+              item.is_checked ? 'text-bark-500 line-through' : 'text-white'
+            ]">
+              {{ item.ingredient_name }}
+            </span>
+          </label>
+        </div>
+      </div>
+    </div>
 
-    <v-dialog v-model="showAddItemDialog" max-width="400">
-      <v-card>
-        <v-card-title>Add Item</v-card-title>
-        <v-card-text>
-          <v-text-field
-            v-model="newItemName"
-            label="Item name"
-            @keyup.enter="addItem"
-          ></v-text-field>
-        </v-card-text>
-        <v-card-actions>
-          <v-spacer></v-spacer>
-          <v-btn @click="showAddItemDialog = false">Cancel</v-btn>
-          <v-btn color="primary" :loading="addingItem" @click="addItem">Add</v-btn>
-        </v-card-actions>
-      </v-card>
-    </v-dialog>
+    <!-- Add Item Modal -->
+    <Modal :show="showAddItemModal" title="Add Item" @close="showAddItemModal = false">
+      <input
+        v-model="newItemName"
+        type="text"
+        class="input-field"
+        placeholder="Enter item name"
+        @keyup.enter="addItem"
+      />
+      <template #footer>
+        <button @click="showAddItemModal = false" class="btn-secondary">Cancel</button>
+        <button @click="addItem" class="btn-primary">Add</button>
+      </template>
+    </Modal>
 
-    <v-dialog v-model="showAddSourceDialog" max-width="400">
-      <v-card>
-        <v-card-title>Add Source List</v-card-title>
-        <v-card-text>
-          <v-select
-            v-model="selectedSourceList"
-            :items="availableLists"
-            item-title="name"
-            item-value="id"
-            label="Select list"
-          ></v-select>
-        </v-card-text>
-        <v-card-actions>
-          <v-spacer></v-spacer>
-          <v-btn @click="showAddSourceDialog = false">Cancel</v-btn>
-          <v-btn color="primary" :loading="addingSource" :disabled="!selectedSourceList" @click="addSource">
-            Add
-          </v-btn>
-        </v-card-actions>
-      </v-card>
-    </v-dialog>
+    <!-- Add Source Modal -->
+    <Modal :show="showAddSourceModal" title="Add Source List" @close="showAddSourceModal = false">
+      <select v-model="selectedSourceList" class="input-field">
+        <option value="">Select a list</option>
+        <option
+          v-for="list in availableLists"
+          :key="list.id"
+          :value="list.id"
+        >
+          {{ list.name }} ({{ list.ingredient_count || 0 }} items)
+        </option>
+      </select>
+      <template #footer>
+        <button @click="showAddSourceModal = false" class="btn-secondary">Cancel</button>
+        <button
+          @click="addSource"
+          :disabled="!selectedSourceList"
+          class="btn-primary"
+        >
+          Add
+        </button>
+      </template>
+    </Modal>
   </div>
 </template>
 
 <script setup lang="ts">
 import { useGroceryStore, type GroceryItem } from '~/stores/grocery'
 import { useListsStore } from '~/stores/lists'
-import draggable from 'vuedraggable'
+import Modal from '~/components/Modal.vue'
+import Checkbox from '~/components/Checkbox.vue'
 
 const route = useRoute()
 const groceryStore = useGroceryStore()
 const listsStore = useListsStore()
-const snackbar = inject<any>('snackbar')
+const toast = useToast()
 
-const showAddItemDialog = ref(false)
-const showAddSourceDialog = ref(false)
+const showAddItemModal = ref(false)
+const showAddSourceModal = ref(false)
 const newItemName = ref('')
-const addingItem = ref(false)
-const selectedSourceList = ref<number | null>(null)
-const addingSource = ref(false)
-const editName = ref('')
-
-const availableLists = computed(() => {
-  const currentSourceIds = groceryStore.currentList?.sources?.map(s => s.id) || []
-  return listsStore.lists.filter(l => !currentSourceIds.includes(l.id))
-})
+const selectedSourceList = ref<string | number>('')
 
 const totalCount = computed(() => {
   return groceryStore.currentList?.sections?.reduce((sum, s) => sum + s.items.length, 0) || 0
@@ -205,53 +202,39 @@ const progress = computed(() => {
   return (checkedCount.value / totalCount.value) * 100
 })
 
+const availableLists = computed(() => {
+  const currentSourceIds = groceryStore.currentList?.sources?.map(s => s.id) || []
+  return listsStore.lists.filter(l => !currentSourceIds.includes(l.id))
+})
+
 onMounted(async () => {
   const id = Number(route.params.id)
   await Promise.all([
     groceryStore.fetchList(id),
     listsStore.fetchLists()
   ])
-  editName.value = groceryStore.currentList?.name || ''
 })
 
-async function updateName() {
-  if (editName.value.trim() && groceryStore.currentList) {
-    await groceryStore.updateListName(groceryStore.currentList.id, editName.value)
-  }
-}
-
-async function toggleChecked(item: GroceryItem) {
+async function toggleItem(item: GroceryItem) {
   if (groceryStore.currentList) {
-    await groceryStore.toggleChecked(groceryStore.currentList.id, item.id, !item.is_checked)
+    await groceryStore.toggleChecked(groceryStore.currentList.id, item.id, item.is_checked)
   }
 }
 
 async function addItem() {
   if (!newItemName.value.trim() || !groceryStore.currentList) return
-  addingItem.value = true
-  try {
-    await groceryStore.addItem(groceryStore.currentList.id, newItemName.value.trim())
-    newItemName.value = ''
-    showAddItemDialog.value = false
-    snackbar.show = true
-    snackbar.message = 'Item added'
-  } finally {
-    addingItem.value = false
-  }
+  await groceryStore.addItem(groceryStore.currentList.id, newItemName.value.trim())
+  newItemName.value = ''
+  showAddItemModal.value = false
+  toast.success('Item added')
 }
 
 async function addSource() {
   if (!selectedSourceList.value || !groceryStore.currentList) return
-  addingSource.value = true
-  try {
-    await groceryStore.addSource(groceryStore.currentList.id, selectedSourceList.value)
-    selectedSourceList.value = null
-    showAddSourceDialog.value = false
-    snackbar.show = true
-    snackbar.message = 'List added'
-  } finally {
-    addingSource.value = false
-  }
+  await groceryStore.addSource(groceryStore.currentList.id, selectedSourceList.value as number)
+  selectedSourceList.value = ''
+  showAddSourceModal.value = false
+  toast.success('List added')
 }
 
 async function removeItem(item: GroceryItem) {
@@ -259,24 +242,4 @@ async function removeItem(item: GroceryItem) {
     await groceryStore.updateItem(groceryStore.currentList.id, item.id, { is_checked: item.is_checked } as any)
   }
 }
-
-async function removeSource(listId: number) {
-  if (groceryStore.currentList) {
-    snackbar.show = true
-    snackbar.message = 'Remove source not implemented'
-  }
-}
-
-async function onDragEnd() {
-  if (groceryStore.currentList) {
-    snackbar.show = true
-    snackbar.message = 'Section updated - will be remembered for next time'
-  }
-}
 </script>
-
-<style scoped>
-.cursor-move {
-  cursor: move;
-}
-</style>

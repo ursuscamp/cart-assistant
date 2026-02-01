@@ -1,147 +1,198 @@
 <template>
-  <div>
-    <v-row>
-      <v-col cols="12">
-        <h1 class="text-h4 mb-4">Settings</h1>
-      </v-col>
-    </v-row>
+  <div class="max-w-6xl mx-auto space-y-6">
+    <!-- Header -->
+    <div>
+      <h1 class="text-3xl font-bold text-white">Settings</h1>
+      <p class="text-bark-400 mt-1">Configure your grocery sections and preferences</p>
+    </div>
 
-    <v-row>
-      <v-col cols="12" md="6">
-        <v-card>
-          <v-card-title class="d-flex align-center">
-            Grocery Sections
-            <v-spacer></v-spacer>
-            <v-btn size="small" color="primary" @click="showAddSectionDialog = true">
-              <v-icon left>mdi-plus</v-icon>
-              Add
-            </v-btn>
-          </v-card-title>
-          <v-card-text>
-            <draggable
-              v-model="sectionsStore.sections"
-              :group="{ name: 'sections', pull: false, put: false }"
-              item-key="id"
-              @end="onSectionReorder"
+    <div class="grid lg:grid-cols-2 gap-6">
+      <!-- Sections -->
+      <div class="card">
+        <div class="section-header">
+          <div class="flex items-center gap-3">
+            <div class="w-8 h-8 rounded-lg bg-forest-600/20 flex items-center justify-center">
+              <svg class="w-5 h-5 text-forest-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+              </svg>
+            </div>
+            <h3 class="font-semibold text-white">Grocery Sections</h3>
+          </div>
+          <button @click="showAddSectionModal = true" class="btn-ghost">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+            </svg>
+          </button>
+        </div>
+        <div class="p-4 space-y-2 max-h-96 overflow-y-auto scrollbar-thin">
+          <div
+            v-for="(section, index) in sectionsStore.sections"
+            :key="section.id"
+            class="flex items-center gap-3 p-3 rounded-lg bg-bark-900/50 border border-bark-800"
+          >
+            <div class="cursor-grab text-bark-500">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8h16M4 16h16" />
+              </svg>
+            </div>
+            <span class="flex-1 font-medium text-white">{{ section.name }}</span>
+            <button
+              @click="editSection(section)"
+              class="p-1.5 rounded-lg text-bark-400 hover:text-white hover:bg-bark-800 transition-colors"
             >
-              <template #item="{ element }">
-                <v-card variant="outlined" class="mb-2 cursor-move">
-                  <v-card-text class="d-flex align-center py-2">
-                    <v-icon class="mr-2">mdi-drag-vertical</v-icon>
-                    <span class="flex-grow-1">{{ element.name }}</span>
-                    <v-btn icon size="x-small" variant="text" @click="editSection(element)">
-                      <v-icon size="small">mdi-pencil</v-icon>
-                    </v-btn>
-                    <v-btn icon size="x-small" variant="text" color="error" @click="deleteSection(element)">
-                      <v-icon size="small">mdi-delete</v-icon>
-                    </v-btn>
-                  </v-card-text>
-                </v-card>
-              </template>
-            </draggable>
-          </v-card-text>
-        </v-card>
-      </v-col>
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+              </svg>
+            </button>
+            <button
+              @click="deleteSection(section)"
+              class="p-1.5 rounded-lg text-bark-400 hover:text-red-400 hover:bg-red-900/20 transition-colors"
+            >
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+              </svg>
+            </button>
+          </div>
+        </div>
+      </div>
 
-      <v-col cols="12" md="6">
-        <v-card>
-          <v-card-title>Item Section Mappings</v-card-title>
-          <v-card-text>
-            <p class="text-body-2 text-grey mb-4">
-              Manually overridden item-section assignments. These take precedence over LLM suggestions.
-            </p>
-            <v-text-field
-              v-model="mappingSearch"
-              label="Search items"
-              density="compact"
-              prepend-inner-icon="mdi-magnify"
-              clearable
-              hide-details
-              class="mb-2"
-            ></v-text-field>
-            <v-list density="compact" max-height="400" class="overflow-y-auto">
-              <v-list-item v-for="mapping in filteredMappings" :key="mapping.item_name">
-                <v-list-item-title>{{ mapping.item_name }}</v-list-item-title>
-                <v-list-item-subtitle>
-                  <v-chip size="x-small" :color="mapping.is_manual_override ? 'info' : 'default'">
+      <!-- Item Mappings -->
+      <div class="card">
+        <div class="section-header">
+          <div class="flex items-center gap-3">
+            <div class="w-8 h-8 rounded-lg bg-moss-500/20 flex items-center justify-center">
+              <svg class="w-5 h-5 text-moss-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+            </div>
+            <h3 class="font-semibold text-white">Item Section Mappings</h3>
+          </div>
+        </div>
+        <div class="card-body">
+          <p class="text-sm text-bark-400 mb-4">
+            Manually overridden item-section assignments. These take precedence over LLM suggestions.
+          </p>
+          <input
+            v-model="mappingSearch"
+            type="text"
+            class="input-field mb-4"
+            placeholder="Search items..."
+          />
+          <div v-if="filteredMappings.length > 0" class="space-y-2 max-h-64 overflow-y-auto scrollbar-thin">
+            <div
+              v-for="mapping in filteredMappings"
+              :key="mapping.item_name"
+              class="flex items-center justify-between p-3 rounded-lg bg-bark-900/50 border border-bark-800"
+            >
+              <div>
+                <p class="font-medium text-white">{{ mapping.item_name }}</p>
+                <div class="flex items-center gap-2 mt-1">
+                  <span
+                    :class="[
+                      'text-xs px-2 py-0.5 rounded-full',
+                      mapping.is_manual_override
+                        ? 'bg-forest-600/30 text-forest-300'
+                        : 'bg-bark-700 text-bark-400'
+                    ]"
+                  >
                     {{ mapping.section_name }}
-                  </v-chip>
-                </v-list-item-subtitle>
-                <template v-slot:append>
-                  <v-select
-                    :model-value="mapping.section_id"
-                    :items="sectionsStore.sections"
-                    item-title="name"
-                    item-value="id"
-                    density="compact"
-                    hide-details
-                    style="width: 150px"
-                    @update:model-value="updateMapping(mapping.item_name, $event)"
-                  ></v-select>
-                </template>
-              </v-list-item>
-            </v-list>
-            <p v-if="mappings.length === 0" class="text-center text-grey py-4">
-              No mappings yet. Drag items between sections in a grocery list to create mappings.
+                  </span>
+                </div>
+              </div>
+              <select
+                :value="mapping.section_id"
+                @change="updateMapping(mapping.item_name, Number(($event.target as HTMLSelectElement).value))"
+                class="bg-bark-800 border border-bark-700 text-white text-sm rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-forest-500"
+              >
+                <option v-for="section in sectionsStore.sections" :key="section.id" :value="section.id">
+                  {{ section.name }}
+                </option>
+              </select>
+            </div>
+          </div>
+          <div v-else class="text-center py-8">
+            <p class="text-bark-400">No mappings yet</p>
+            <p class="text-sm text-bark-500 mt-1">
+              Drag items between sections in a grocery list to create mappings.
             </p>
-          </v-card-text>
-        </v-card>
+          </div>
+        </div>
+      </div>
 
-        <v-card class="mt-4">
-          <v-card-title>LLM Configuration</v-card-title>
-          <v-card-text>
-            <v-alert type="info" variant="tonal" class="mb-4">
-              OpenRouter API is configured via environment variables.
-            </v-alert>
-            <v-list density="compact">
-              <v-list-item>
-                <v-list-item-title>API Key</v-list-item-title>
-                <v-list-item-subtitle>
-                  {{ openrouterApiKey ? '••••••••••••••••' : 'Not configured' }}
-                </v-list-item-subtitle>
-              </v-list-item>
-              <v-list-item>
-                <v-list-item-title>Model</v-list-item-title>
-                <v-list-item-subtitle>{{ openrouterModel }}</v-list-item-subtitle>
-              </v-list-item>
-            </v-list>
-          </v-card-text>
-        </v-card>
-      </v-col>
-    </v-row>
+      <!-- LLM Configuration -->
+      <div class="card lg:col-span-2">
+        <div class="section-header">
+          <div class="flex items-center gap-3">
+            <div class="w-8 h-8 rounded-lg bg-secondary/20 flex items-center justify-center">
+              <svg class="w-5 h-5 text-secondary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+              </svg>
+            </div>
+            <h3 class="font-semibold text-white">LLM Configuration</h3>
+          </div>
+        </div>
+        <div class="card-body">
+          <div class="bg-bark-900/50 border border-bark-800 rounded-lg p-4 mb-4">
+            <div class="flex items-center gap-3 mb-3">
+              <svg class="w-5 h-5 text-forest-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              <p class="text-sm text-bark-300">OpenRouter API is configured via environment variables.</p>
+            </div>
+          </div>
+          <div class="grid md:grid-cols-2 gap-4">
+            <div class="p-4 rounded-lg bg-bark-900/50 border border-bark-800">
+              <p class="text-xs text-bark-500 uppercase tracking-wide mb-1">API Key</p>
+              <p class="text-white font-mono">
+                {{ openrouterApiKey ? '••••••••••••••••' : 'Not configured' }}
+              </p>
+            </div>
+            <div class="p-4 rounded-lg bg-bark-900/50 border border-bark-800">
+              <p class="text-xs text-bark-500 uppercase tracking-wide mb-1">Model</p>
+              <p class="text-white font-mono">{{ openrouterModel }}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
 
-    <v-dialog v-model="showAddSectionDialog" max-width="400">
-      <v-card>
-        <v-card-title>{{ editingSection ? 'Edit Section' : 'Add Section' }}</v-card-title>
-        <v-card-text>
-          <v-text-field v-model="sectionForm.name" label="Section name"></v-text-field>
-        </v-card-text>
-        <v-card-actions>
-          <v-spacer></v-spacer>
-          <v-btn @click="closeSectionDialog">Cancel</v-btn>
-          <v-btn color="primary" @click="saveSection">Save</v-btn>
-        </v-card-actions>
-      </v-card>
-    </v-dialog>
+    <!-- Add/Edit Section Modal -->
+    <Modal
+      :show="showAddSectionModal"
+      :title="editingSection ? 'Edit Section' : 'Add Section'"
+      @close="closeSectionModal"
+    >
+      <input
+        v-model="sectionForm.name"
+        type="text"
+        class="input-field"
+        :placeholder="editingSection ? 'Section name' : 'New section name'"
+      />
+      <template #footer>
+        <button @click="closeSectionModal" class="btn-secondary">Cancel</button>
+        <button @click="saveSection" class="btn-primary">Save</button>
+      </template>
+    </Modal>
   </div>
 </template>
 
 <script setup lang="ts">
 import { useSectionsStore, type Section } from '~/stores/sections'
-import draggable from 'vuedraggable'
+import Modal from '~/components/Modal.vue'
 
 const config = useRuntimeConfig()
-const snackbar = inject<any>('snackbar')
-
 const sectionsStore = useSectionsStore()
-const mappings = ref<Array<{ item_name: string; section_id: number; section_name: string; is_manual_override: number }>>([])
-const mappingSearch = ref('')
-const showAddSectionDialog = ref(false)
-const editingSection = ref<Section | null>(null)
-const sectionForm = reactive({ name: '' })
+const toast = useToast()
 
 const openrouterApiKey = config.openrouterApiKey
 const openrouterModel = config.openrouterModel
+
+const mappings = ref<Array<{ item_name: string; section_id: number; section_name: string; is_manual_override: number }>>([])
+const mappingSearch = ref('')
+
+const showAddSectionModal = ref(false)
+const editingSection = ref<Section | null>(null)
+const sectionForm = reactive({ name: '' })
 
 const filteredMappings = computed(() => {
   if (!mappingSearch.value.trim()) return mappings.value
@@ -161,52 +212,55 @@ async function fetchMappings() {
   mappings.value = await $fetch('/api/mappings')
 }
 
-async function onSectionReorder() {
-  const sectionIds = sectionsStore.sections.map(s => s.id)
-  await sectionsStore.reorderSections(sectionIds)
-  snackbar.show = true
-  snackbar.message = 'Section order updated'
-}
-
 function editSection(section: Section) {
   editingSection.value = section
   sectionForm.name = section.name
-  showAddSectionDialog.value = true
+  showAddSectionModal.value = true
 }
 
-function deleteSection(section: Section) {
-  if (confirm(`Delete section "${section.name}"?`)) {
-    sectionsStore.deleteSection(section.id)
-  }
-}
-
-function closeSectionDialog() {
-  showAddSectionDialog.value = false
+function closeSectionModal() {
+  showAddSectionModal.value = false
   editingSection.value = null
   sectionForm.name = ''
 }
 
 async function saveSection() {
   if (!sectionForm.name.trim()) return
-  if (editingSection.value) {
-    await sectionsStore.updateSection(editingSection.value.id, sectionForm.name)
-  } else {
-    await sectionsStore.createSection(sectionForm.name)
+  try {
+    if (editingSection.value) {
+      await sectionsStore.updateSection(editingSection.value.id, sectionForm.name)
+      toast.success('Section updated')
+    } else {
+      await sectionsStore.createSection(sectionForm.name)
+      toast.success('Section created')
+    }
+    closeSectionModal()
+  } catch (error) {
+    toast.error('Failed to save section')
   }
-  closeSectionDialog()
+}
+
+async function deleteSection(section: Section) {
+  if (confirm(`Delete section "${section.name}"?`)) {
+    try {
+      await sectionsStore.deleteSection(section.id)
+      toast.success('Section deleted')
+    } catch (error) {
+      toast.error('Failed to delete section')
+    }
+  }
 }
 
 async function updateMapping(itemName: string, sectionId: number) {
-  await $fetch(`/api/mappings/${encodeURIComponent(itemName)}`, {
-    method: 'PUT',
-    body: { section_id: sectionId }
-  })
-  await fetchMappings()
+  try {
+    await $fetch(`/api/mappings/${encodeURIComponent(itemName)}`, {
+      method: 'PUT',
+      body: { section_id: sectionId }
+    })
+    await fetchMappings()
+    toast.success('Mapping updated')
+  } catch (error) {
+    toast.error('Failed to update mapping')
+  }
 }
 </script>
-
-<style scoped>
-.cursor-move {
-  cursor: move;
-}
-</style>

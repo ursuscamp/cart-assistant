@@ -1,33 +1,16 @@
-import vuetify, { transformAssetUrls } from 'vite-plugin-vuetify'
-
 export default defineNuxtConfig({
   future: {
     compatibilityVersion: 4,
   },
+  srcDir: 'app',
   devtools: { enabled: false },
 
-  build: {
-    transpile: ['vuetify'],
-  },
+  css: ['~/assets/css/main.css'],
 
   modules: [
     '@pinia/nuxt',
-    (_options, nuxt) => {
-      nuxt.hooks.hook('vite:extendConfig', (config) => {
-        config.plugins!.push(vuetify({ autoImport: true }))
-      })
-    },
+    '@nuxtjs/tailwindcss',
   ],
-
-  vite: {
-    vue: {
-      template: {
-        transformAssetUrls,
-      },
-    },
-  },
-
-  css: ['@mdi/font/css/materialdesignicons.min.css'],
 
   runtimeConfig: {
     openrouterApiKey: process.env.OPENROUTER_API_KEY || '',
