@@ -14,7 +14,7 @@
             Quick Create Grocery List
           </v-card-title>
           <v-card-text class="pt-4">
-            <p class="text-body-1 text-grey-darken-1 mb-4 font-weight-medium">
+            <p class="text-body-1 text-grey-lighten-1 mb-4 font-weight-medium">
               Select lists to combine into your grocery list:
             </p>
             <v-list v-if="listsStore.lists.length > 0" density="compact" class="rounded-lg mb-4">
@@ -23,14 +23,14 @@
                 :key="list.id"
                 :value="list.id"
                 rounded="lg"
-                class="mb-1 bg-white"
+                class="mb-1"
               >
                 <template v-slot:prepend>
                   <v-checkbox-btn v-model="selectedLists" :value="list.id" color="primary"></v-checkbox-btn>
                 </template>
-                <v-list-item-title class="font-weight-bold text-grey-darken-3">{{ list.name }}</v-list-item-title>
+                <v-list-item-title class="font-weight-medium">{{ list.name }}</v-list-item-title>
                 <v-list-item-subtitle>
-                  <v-chip size="small" color="primary" variant="tonal" class="text-primary">
+                  <v-chip size="small" color="primary" variant="tonal">
                     {{ list.ingredient_count || 0 }} items
                   </v-chip>
                 </v-list-item-subtitle>
@@ -45,6 +45,7 @@
               placeholder="Week of Feb 1"
               color="primary"
               hide-details
+              base-color="primary"
             ></v-text-field>
           </v-card-text>
           <v-card-actions class="pa-4 pt-0">
@@ -55,7 +56,6 @@
               :loading="loading"
               :disabled="selectedLists.length === 0"
               @click="createGroceryList"
-              elevation="2"
             >
               <v-icon left>mdi-cart-plus</v-icon>
               Create Grocery List
@@ -84,9 +84,9 @@
                     <v-icon color="white">mdi-cart</v-icon>
                   </v-avatar>
                 </template>
-                <v-list-item-title class="font-weight-bold text-grey-darken-3">{{ list.name }}</v-list-item-title>
+                <v-list-item-title class="font-weight-medium">{{ list.name }}</v-list-item-title>
                 <v-list-item-subtitle>
-                  <span class="text-primary font-weight-medium">{{ list.item_count || 0 }} items</span>
+                  <span class="text-primary">{{ list.item_count || 0 }} items</span>
                   <span v-if="list.checked_count" class="text-success ml-2">
                     · {{ list.checked_count }} checked
                   </span>
@@ -97,7 +97,7 @@
               </v-list-item>
             </v-list>
             <div v-else class="text-center py-6">
-              <v-icon size="64" color="grey-lighten-1">mdi-cart-outline</v-icon>
+              <v-icon size="64" color="grey-darken-1">mdi-cart-outline</v-icon>
               <p class="text-body-1 text-grey mt-2">No grocery lists yet</p>
             </div>
           </v-card-text>
@@ -109,15 +109,15 @@
             Quick Actions
           </v-card-title>
           <v-card-text class="pt-4">
-            <v-btn block color="secondary" size="large" class="mb-3" to="/lists" elevation="2">
+            <v-btn block color="secondary" size="large" class="mb-3" to="/lists">
               <v-icon left>mdi-format-list-bulleted</v-icon>
               Manage Lists
             </v-btn>
-            <v-btn block color="secondary" size="large" class="mb-3" to="/grocery" elevation="2">
+            <v-btn block color="secondary" size="large" class="mb-3" to="/grocery">
               <v-icon left>mdi-cart</v-icon>
               View All Grocery Lists
             </v-btn>
-            <v-btn block color="secondary" size="large" to="/settings" elevation="2">
+            <v-btn block color="secondary" size="large" to="/settings">
               <v-icon left>mdi-cog</v-icon>
               Settings
             </v-btn>

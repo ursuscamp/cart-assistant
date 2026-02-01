@@ -3,48 +3,34 @@ import * as components from 'vuetify/components'
 import * as directives from 'vuetify/directives'
 
 export default defineNuxtPlugin((app) => {
-  const link = document.createElement('link')
-  link.href = 'https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap'
-  link.rel = 'stylesheet'
-  document.head.appendChild(link)
-
-  const style = document.createElement('style')
-  style.textContent = `
-    * {
-      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
-    }
-    body {
-      font-weight: 400;
-      -webkit-font-smoothing: antialiased;
-      -moz-osx-font-smoothing: grayscale;
-    }
-    .text-h1, .text-h2, .text-h3, .text-h4, .text-h5, .text-h6 {
-      font-weight: 700 !important;
-      letter-spacing: -0.02em;
-    }
-    .v-card-title {
-      font-weight: 600 !important;
-    }
-    .v-btn {
-      text-transform: none !important;
-      letter-spacing: 0.02em;
-    }
-    .v-list-item-title {
-      font-weight: 500 !important;
-    }
-    .v-list-item-subtitle {
-      font-weight: 400 !important;
-    }
-  `
-  document.head.appendChild(style)
-
   const vuetify = createVuetify({
     components,
     directives,
     theme: {
-      defaultTheme: 'greenTheme',
+      defaultTheme: 'darkGreen',
       themes: {
-        greenTheme: {
+        darkGreen: {
+          dark: true,
+          colors: {
+            primary: '#4CAF50',
+            'primary-darken-1': '#388E3C',
+            secondary: '#66BB6A',
+            'secondary-darken-1': '#4CAF50',
+            accent: '#A5D6A7',
+            error: '#EF5350',
+            'error-darken-1': '#C62828',
+            warning: '#FFB74D',
+            'warning-darken-1': '#FF9800',
+            info: '#4FC3F7',
+            'info-darken-1': '#29B6F6',
+            success: '#66BB6A',
+            'success-darken-1': '#4CAF50',
+            background: '#121212',
+            surface: '#1E1E1E',
+            'surface-variant': '#2C2C2C',
+          },
+        },
+        light: {
           dark: false,
           colors: {
             primary: '#2E7D32',
@@ -63,28 +49,6 @@ export default defineNuxtPlugin((app) => {
             background: '#F5F9F5',
             surface: '#FFFFFF',
             'surface-variant': '#E8F5E9',
-            'on-surface': '#1A1A1A',
-            'on-surface-variant': '#424242',
-          },
-        },
-        dark: {
-          colors: {
-            primary: '#4CAF50',
-            'primary-darken-1': '#388E3C',
-            secondary: '#66BB6A',
-            'secondary-darken-1': '#4CAF50',
-            accent: '#A5D6A7',
-            error: '#EF5350',
-            'error-darken-1': '#C62828',
-            warning: '#FFB74D',
-            'warning-darken-1': '#FF9800',
-            info: '#4FC3F7',
-            'info-darken-1': '#29B6F6',
-            success: '#66BB6A',
-            'success-darken-1': '#4CAF50',
-            background: '#1A2A1A',
-            surface: '#243024',
-            'surface-variant': '#2D3F2D',
           },
         },
       },
@@ -96,7 +60,7 @@ export default defineNuxtPlugin((app) => {
       },
       VCard: {
         rounded: 'lg',
-        elevation: 3,
+        elevation: 2,
       },
       VTextField: {
         variant: 'outlined',
@@ -119,7 +83,7 @@ export default defineNuxtPlugin((app) => {
         rounded: 'lg',
       },
       VAppBar: {
-        elevation: 0,
+        elevation: 1,
       },
       VNavigationDrawer: {
         elevation: 2,
