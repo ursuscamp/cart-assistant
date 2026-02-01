@@ -1,0 +1,22 @@
+version: '3.8'
+
+services:
+  grocery-app:
+    build: .
+    container_name: cart-assistant
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./data:/data
+    environment:
+      - DATABASE_PATH=/data/grocery.db
+      - NUXT_HOST=0.0.0.0
+      - NUXT_PORT=3000
+      - OPENROUTER_API_KEY=${OPENROUTER_API_KEY}
+      - OPENROUTER_MODEL=google/gemini-3-flash-preview
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost:3000/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
