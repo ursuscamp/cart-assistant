@@ -44,7 +44,7 @@
     </div>
 
     <div class="space-y-4">
-      <div v-for="section in sortedSections" :key="section.id" class="card overflow-hidden">
+      <div v-for="section in localSections" :key="section.id" class="card overflow-hidden">
         <div class="section-header px-4 py-3">
           <div class="flex items-center justify-between">
             <div class="flex items-center gap-3">
@@ -58,9 +58,22 @@
             </div>
           </div>
         </div>
-        <div v-if="section.items.length > 0" class="divide-y divide-bark-800">
-          <template v-for="item in sortedSectionItems(section.items)" :key="item.id">
+        <draggable 
+          v-model="section.items" 
+          group="grocery-items" 
+          item-key="id"
+          class="divide-y divide-bark-800"
+          ghost-class="opacity-50"
+          drag-class="opacity-100"
+          @end="onDragEnd(section)"
+        >
+          <template #item="{ element: item }">
             <div :class="['flex items-center gap-2 lg:gap-4 px-3 lg:px-4 py-3 lg:py-4 transition-all duration-200 touch-manipulation', item.is_checked ? 'bg-bark-900/30' : 'hover:bg-bark-800/30']">
+              <div class="flex-shrink-0 cursor-grab">
+                <svg class="w-4 h-4 text-bark-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8h16M4 16h16" />
+                </svg>
+              </div>
               <div class="flex-shrink-0">
                 <Checkbox v-model="item.is_checked" @change="toggleItem(item)" />
               </div>
@@ -77,8 +90,8 @@
               </button>
             </div>
           </template>
-        </div>
-        <div v-else class="px-4 py-6 lg:py-8 text-center text-bark-500 text-sm">No items in this section</div>
+        </draggable>
+        <div v-if="section.items.length === 0" class="px-4 py-6 lg:py-8 text-center text-bark-500 text-sm">No items in this section</div>
       </div>
     </div>
 
@@ -104,6 +117,7 @@
 </template>
 
 <script setup lang="ts">
+import draggable from 'vuedraggable'
 import { useGroceryStore, type GroceryItem } from '~/stores/grocery'
 import { useListsStore } from '~/stores/lists'
 import { useSectionsStore } from '~/stores/sections'
@@ -121,6 +135,8 @@ const showAddSourceModal = ref(false)
 const newItemName = ref('')
 const selectedSourceList = ref<string | number>('')
 
+const localSections = ref<Array<{ id: number; name: string; items: GroceryItem[] }>>([])
+
 const totalCount = computed(() => groceryStore.currentList?.sections?.reduce((sum, s) => sum + s.items.length, 0) || 0)
 const checkedCount = computed(() => groceryStore.currentList?.sections?.reduce((sum, s) => sum + s.items.filter(i => i.is_checked).length, 0) || 0)
 const progress = computed(() => totalCount.value === 0 ? 0 : (checkedCount.value / totalCount.value) * 100)
@@ -132,18 +148,42 @@ const availableLists = computed(() => {
 
 const allSections = computed(() => sectionsStore.sections)
 
-const sortedSections = computed(() => {
-  if (!groceryStore.currentList?.sections) return []
-  const sections = groceryStore.currentList.sections.map((s, i) => ({ ...s, originalIndex: i }))
-  const uncompleted = sections.filter(s => s.items.some(i => !i.is_checked))
-  const completed = sections.filter(s => s.items.length > 0 && s.items.every(i => i.is_checked))
-  return [...uncompleted, ...completed]
-})
+async function onDragEnd(section: { id: number; items: GroceryItem[] }) {
+  if (!groceryStore.currentList) return
+  for (const item of section.items) {
+    if (item.section_id !== section.id) {
+      await groceryStore.updateItem(groceryStore.currentList.id, item.id, { section_id: section.id, is_manual_override: true })
+    }
+  }
+  toast.success('Items reordered')
+}
 
 onMounted(async () => {
   const id = Number(route.params.id)
   await Promise.all([groceryStore.fetchList(id), listsStore.fetchLists(), sectionsStore.fetchSections()])
+  syncLocalSections()
 })
+
+watch(() => groceryStore.currentList, () => {
+  syncLocalSections()
+})
+
+function syncLocalSections() {
+  if (groceryStore.currentList?.sections) {
+    localSections.value = groceryStore.currentList.sections.map(s => ({
+      ...s,
+      items: [...s.items]
+    }))
+  }
+}
+
+async function onItemDrop(evt: any, targetSectionId: number) {
+  if (!groceryStore.currentList) return
+  const item = evt.item.__draggable_context?.element
+  if (!item) return
+  await groceryStore.updateItem(groceryStore.currentList.id, item.id, { section_id: targetSectionId, is_manual_override: true })
+  toast.success('Section updated')
+}
 
 async function toggleItem(item: GroceryItem) {
   if (groceryStore.currentList) await groceryStore.toggleChecked(groceryStore.currentList.id, item.id, item.is_checked)
