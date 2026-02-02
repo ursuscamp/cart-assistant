@@ -67,10 +67,10 @@
       </main>
     </div>
 
-    <!-- Toast Notifications -->
+      <!-- Toast Notifications -->
     <Teleport to="body">
       <Transition name="slide-up">
-        <div v-if="toast.show" :class="[
+        <div v-if="toast.show && toast.message" :class="[
           'fixed bottom-4 right-4 left-4 lg:left-auto px-4 py-3 lg:px-6 lg:py-4 rounded-lg shadow-xl border z-50 flex items-center gap-3',
           toast.type === 'success' ? 'bg-forest-600 border-forest-500 text-white' :
           toast.type === 'error' ? 'bg-red-600 border-red-500 text-white' :

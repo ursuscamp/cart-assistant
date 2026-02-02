@@ -10,12 +10,20 @@ const toast = reactive<Toast>({
   show: false
 })
 
+let timeoutId: ReturnType<typeof setTimeout> | null = null
+
 export function useToast() {
   function show(message: string, type: 'success' | 'error' | 'info' = 'success') {
+    if (!message) return
     toast.message = message
     toast.type = type
     toast.show = true
-    setTimeout(() => {
+
+    if (timeoutId) {
+      clearTimeout(timeoutId)
+    }
+
+    timeoutId = setTimeout(() => {
       toast.show = false
     }, 3000)
   }
