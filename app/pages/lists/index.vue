@@ -122,10 +122,10 @@
       </template>
     </Modal>
 
-    <Modal :show="showImportModal" title="Import Lists from Text" @close="closeImportModal" size="lg">
-      <div class="space-y-4">
+    <Modal :show="showImportModal" title="Import Lists from Text" @close="closeImportModal" size="xl">
+      <div class="space-y-4 max-h-[calc(100vh-220px)] overflow-y-auto pr-2 scrollbar-thin">
         <p class="text-sm text-bark-300">Paste your recipe or shopping lists below.</p>
-        <textarea v-model="importText" class="input-field min-h-48 font-mono text-sm" placeholder="SPAGHETTI:&#10;1 lb ground beef&#10;1 jar marinara sauce&#10;1 lb spaghetti pasta"></textarea>
+        <textarea v-model="importText" class="input-field min-h-32 font-mono text-sm" placeholder="SPAGHETTI:&#10;1 lb ground beef&#10;1 jar marinara sauce&#10;1 lb spaghetti pasta"></textarea>
         <button @click="previewImport" :disabled="!importText.trim() || importing" class="btn-primary w-full touch-manipulation">
           <svg v-if="importing" class="animate-spin -ml-1 mr-2 h-5 w-5" fill="none" viewBox="0 0 24 24">
             <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
@@ -135,16 +135,18 @@
         </button>
         <div v-if="importPreview.length > 0" class="space-y-3">
           <div class="divider"></div>
-          <h4 class="font-medium text-white">Preview</h4>
-          <div v-for="(list, index) in importPreview" :key="index" class="card">
-            <div class="p-4">
-              <label class="flex items-center gap-3 cursor-pointer touch-manipulation">
-                <input v-model="list.selected" type="checkbox" class="checkbox-custom" />
-                <span class="font-medium text-white">{{ list.name }}</span>
-              </label>
-              <div class="mt-3 ml-8 flex flex-wrap gap-1.5">
-                <span v-for="ing in list.ingredients.slice(0, 8)" :key="ing.name" class="chip text-xs">{{ ing.name }} {{ ing.quantity ? `(${ing.quantity})` : '' }}</span>
-                <span v-if="list.ingredients.length > 8" class="chip text-xs">+{{ list.ingredients.length - 8 }} more</span>
+          <h4 class="font-medium text-white">Preview ({{ importPreview.filter(l => l.selected).length }} selected)</h4>
+          <div class="space-y-2 max-h-80 overflow-y-auto scrollbar-thin pr-1">
+            <div v-for="(list, index) in importPreview" :key="index" class="card">
+              <div class="p-3">
+                <label class="flex items-center gap-3 cursor-pointer touch-manipulation">
+                  <input v-model="list.selected" type="checkbox" class="checkbox-custom" />
+                  <span class="font-medium text-white">{{ list.name }}</span>
+                </label>
+                <div class="mt-2 ml-8 flex flex-wrap gap-1">
+                  <span v-for="ing in list.ingredients.slice(0, 6)" :key="ing.name" class="chip text-xs">{{ ing.name }} {{ ing.quantity ? `(${ing.quantity})` : '' }}</span>
+                  <span v-if="list.ingredients.length > 6" class="chip text-xs">+{{ list.ingredients.length - 6 }} more</span>
+                </div>
               </div>
             </div>
           </div>

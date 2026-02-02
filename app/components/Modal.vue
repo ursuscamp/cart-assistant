@@ -1,8 +1,8 @@
 <template>
   <Transition name="modal">
     <div v-if="show" class="modal-overlay" @click="$emit('close')">
-      <div class="modal-container" @click.stop>
-        <div v-if="title" class="modal-header">
+      <div :class="['modal-container', size]" @click.stop>
+        <div v-if="title" class="modal-header flex-shrink-0">
           <h3 class="text-lg font-semibold text-white">{{ title }}</h3>
           <button v-if="showClose" @click="$emit('close')" class="p-1 rounded-lg text-bark-400 hover:text-white hover:bg-bark-800 transition-colors">
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -10,10 +10,10 @@
             </svg>
           </button>
         </div>
-        <div class="modal-body">
+        <div class="modal-body flex-1 overflow-y-auto scrollbar-thin">
           <slot />
         </div>
-        <div v-if="$slots.footer" class="modal-footer">
+        <div v-if="$slots.footer" class="modal-footer flex-shrink-0">
           <slot name="footer" />
         </div>
       </div>
@@ -22,10 +22,15 @@
 </template>
 
 <script setup lang="ts">
-defineProps<{
+withDefaults(defineProps<{
   show: boolean
   title?: string
-}>()
+  size?: 'sm' | 'md' | 'lg' | 'xl'
+  showClose?: boolean
+}>(), {
+  size: 'md',
+  showClose: true
+})
 
 defineEmits<{
   (e: 'close'): void
@@ -38,7 +43,23 @@ defineEmits<{
 }
 
 .modal-container {
-  @apply bg-bark-900 border border-bark-700 rounded-xl w-full max-w-lg;
+  @apply bg-bark-900 border border-bark-700 rounded-xl w-full flex flex-col max-h-[90vh];
+}
+
+.modal-container.sm {
+  @apply max-w-sm;
+}
+
+.modal-container.md {
+  @apply max-w-lg;
+}
+
+.modal-container.lg {
+  @apply max-w-2xl;
+}
+
+.modal-container.xl {
+  @apply max-w-4xl;
 }
 
 .modal-header {
