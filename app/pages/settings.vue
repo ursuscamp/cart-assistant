@@ -22,7 +22,7 @@
             </svg>
           </button>
         </div>
-        <div class="p-3 lg:p-4 space-y-2 overflow-y-auto scrollbar-thin max-h-[calc(100vh-280px)]">
+        <div class="p-3 lg:p-4 space-y-2 overflow-y-auto scrollbar-thin max-h-[calc(100vh-320px)]">
           <div v-for="(section, index) in sectionsStore.sections" :key="section.id" class="flex items-center gap-2 p-2 lg:p-3 rounded-lg bg-bark-900/50 border border-bark-800">
             <div class="cursor-grab text-bark-500 hover:text-bark-300">
               <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -89,7 +89,7 @@
             <button @click="createMapping" :disabled="!newMappingItem.trim() || !newMappingSection" class="btn-primary touch-manipulation">Add</button>
           </div>
           <input v-model="mappingSearch" type="text" class="input-field mb-4 text-sm" placeholder="Search items..." />
-          <div v-if="filteredMappings.length > 0" class="space-y-2 max-h-64 lg:max-h-80 overflow-y-auto scrollbar-thin">
+          <div v-if="filteredMappings.length > 0" class="space-y-2 max-h-[calc(100vh-460px)] overflow-y-auto scrollbar-thin">
             <div v-for="mapping in filteredMappings" :key="mapping.item_name" class="flex items-center justify-between p-2 lg:p-3 rounded-lg bg-bark-900/50 border border-bark-800">
               <div class="flex-1 min-w-0 mr-2">
                 <p class="font-medium text-white truncate text-sm lg:text-base">{{ mapping.item_name }}</p>
