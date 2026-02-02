@@ -130,6 +130,10 @@
     box-shadow: 0 0 20px rgba(56, 178, 88, 0.3);
   }
 
+  .touch-manipulation {
+    touch-action: manipulation;
+  }
+
   .scrollbar-thin::-webkit-scrollbar {
     width: 6px;
   }
