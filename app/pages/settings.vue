@@ -152,12 +152,21 @@
         <button @click="saveSection" class="btn-primary">Save</button>
       </template>
     </Modal>
+
+    <ConfirmationModal
+      :show="showDeleteConfirm"
+      :title="deleteConfirmTitle"
+      :message="deleteConfirmMessage"
+      @close="showDeleteConfirm = false; itemToDelete = null"
+      @confirm="handleDeleteConfirm"
+    />
   </div>
 </template>
 
 <script setup lang="ts">
 import { useSectionsStore, type Section } from '~/stores/sections'
 import Modal from '~/components/Modal.vue'
+import ConfirmationModal from '~/components/ConfirmationModal.vue'
 
 const config = useRuntimeConfig()
 const sectionsStore = useSectionsStore()
@@ -174,6 +183,18 @@ const newMappingSection = ref<number | ''>('')
 const showAddSectionModal = ref(false)
 const editingSection = ref<Section | null>(null)
 const sectionForm = reactive({ name: '' })
+
+const showDeleteConfirm = ref(false)
+const itemToDelete = ref<{ type: 'section' | 'mapping'; data: any } | null>(null)
+
+const deleteConfirmTitle = computed(() => itemToDelete.value?.type === 'section' ? 'Delete Section' : 'Delete Mapping')
+const deleteConfirmMessage = computed(() => {
+  if (!itemToDelete.value) return ''
+  if (itemToDelete.value.type === 'section') {
+    return `Delete section "${itemToDelete.value.data.name}"? This will affect any items mapped to this section.`
+  }
+  return `Delete mapping for "${itemToDelete.value.data.item_name}"?`
+})
 
 const filteredMappings = computed(() => {
   if (!mappingSearch.value.trim()) return mappings.value
@@ -212,13 +233,8 @@ async function updateMapping(itemName: string, sectionId: number) {
 }
 
 async function deleteMapping(itemName: string) {
-  try {
-    await $fetch(`/api/mappings/${encodeURIComponent(itemName)}`, { method: 'DELETE' })
-    await fetchMappings()
-    toast.success('Mapping deleted')
-  } catch (error) {
-    toast.error('Failed to delete mapping')
-  }
+  itemToDelete.value = { type: 'mapping', data: { item_name: itemName } }
+  showDeleteConfirm.value = true
 }
 
 function editSection(section: Section) {
@@ -250,14 +266,28 @@ async function saveSection() {
 }
 
 async function deleteSection(section: Section) {
-  if (confirm(`Delete section "${section.name}"?`)) {
-    try {
-      await sectionsStore.deleteSection(section.id)
+  itemToDelete.value = { type: 'section', data: section }
+  showDeleteConfirm.value = true
+}
+
+async function handleDeleteConfirm() {
+  if (!itemToDelete.value) return
+
+  try {
+    if (itemToDelete.value.type === 'section') {
+      await sectionsStore.deleteSection(itemToDelete.value.data.id)
       toast.success('Section deleted')
-    } catch (error) {
-      toast.error('Failed to delete section')
+    } else if (itemToDelete.value.type === 'mapping') {
+      await $fetch(`/api/mappings/${encodeURIComponent(itemToDelete.value.data.item_name)}`, { method: 'DELETE' })
+      await fetchMappings()
+      toast.success('Mapping deleted')
     }
+  } catch (error) {
+    toast.error('Failed to delete')
   }
+
+  showDeleteConfirm.value = false
+  itemToDelete.value = null
 }
 
 async function moveToTop(sectionId: number) {
