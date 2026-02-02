@@ -77,7 +77,9 @@
                   <p class="font-medium text-white group-hover:text-forest-400 transition-colors">{{ list.name }}</p>
                   <p class="text-sm text-bark-400">
                     {{ list.item_count || 0 }} items
-                    <span v-if="list.checked_count" class="text-forest-400 ml-2">{{ list.checked_count }} checked</span>
+                    <span v-if="list.checked_count" class="text-forest-400 ml-2">
+                      · {{ list.checked_count }} checked
+                    </span>
                   </p>
                 </div>
                 <svg class="w-5 h-5 text-bark-500 group-hover:text-forest-400 transition-colors flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
