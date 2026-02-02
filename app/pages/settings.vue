@@ -6,7 +6,7 @@
     </div>
 
     <div class="grid lg:grid-cols-2 gap-4 lg:gap-6">
-      <div class="card">
+      <div class="card flex flex-col">
         <div class="section-header">
           <div class="flex items-center gap-3">
             <div class="w-8 h-8 rounded-lg bg-forest-600/20 flex items-center justify-center">
@@ -22,7 +22,7 @@
             </svg>
           </button>
         </div>
-        <div class="p-3 lg:p-4 space-y-2 max-h-80 lg:max-h-96 overflow-y-auto scrollbar-thin">
+        <div class="p-3 lg:p-4 space-y-2 overflow-y-auto scrollbar-thin max-h-[calc(100vh-280px)]">
           <div v-for="(section, index) in sectionsStore.sections" :key="section.id" class="flex items-center gap-2 p-2 lg:p-3 rounded-lg bg-bark-900/50 border border-bark-800">
             <div class="cursor-grab text-bark-500 hover:text-bark-300">
               <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
