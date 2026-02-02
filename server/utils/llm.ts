@@ -21,9 +21,8 @@ export async function sortItemsWithLLM(
   existingMappings: Record<string, string>,
   sections: Array<{ id: number; name: string }>
 ): Promise<SortAssignment[]> {
-  const config = useRuntimeConfig()
-  const apiKey = config.openrouterApiKey
-  const model = config.openrouterModel
+  const apiKey = process.env.OPENROUTER_API_KEY
+  const model = process.env.OPENROUTER_MODEL || 'google/gemini-3-flash-preview'
 
   if (!apiKey) {
     throw new Error('OPENROUTER_API_KEY not configured')
@@ -101,9 +100,8 @@ Respond only with valid JSON, no additional text.`
 }
 
 export async function parseImportText(rawText: string): Promise<ImportResult> {
-  const config = useRuntimeConfig()
-  const apiKey = config.openrouterApiKey
-  const model = config.openrouterModel
+  const apiKey = process.env.OPENROUTER_API_KEY
+  const model = process.env.OPENROUTER_MODEL || 'google/gemini-3-flash-preview'
 
   if (!apiKey) {
     throw new Error('OPENROUTER_API_KEY not configured')

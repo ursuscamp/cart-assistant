@@ -24,8 +24,7 @@ export async function getDatabase(): Promise<Database> {
 
   await getSqlJs()
 
-  const config = useRuntimeConfig()
-  let dbPath = config.public.databasePath
+  let dbPath = process.env.DATABASE_PATH || './data/grocery.db'
   if (!path.isAbsolute(dbPath)) {
     dbPath = path.resolve(process.cwd(), dbPath)
   }
@@ -46,9 +45,8 @@ export async function getDatabase(): Promise<Database> {
 
 export async function saveDatabase() {
   if (!db) return
-  
-  const config = useRuntimeConfig()
-  let dbPath = config.public.databasePath
+
+  let dbPath = process.env.DATABASE_PATH || './data/grocery.db'
   if (!path.isAbsolute(dbPath)) {
     dbPath = path.resolve(process.cwd(), dbPath)
   }
