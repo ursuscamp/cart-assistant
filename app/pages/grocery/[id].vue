@@ -44,7 +44,7 @@
     </div>
 
     <div class="space-y-4">
-      <div v-for="section in localSections" :key="section.id" class="card overflow-hidden">
+      <div v-for="section in localSections.filter(s => s.items.length > 0)" :key="section.id" class="card overflow-hidden">
         <div class="section-header px-4 py-3">
           <div class="flex items-center justify-between">
             <div class="flex items-center gap-3">
@@ -91,7 +91,6 @@
             </div>
           </template>
         </draggable>
-        <div v-if="section.items.length === 0" class="px-4 py-6 lg:py-8 text-center text-bark-500 text-sm">No items in this section</div>
       </div>
     </div>
 
