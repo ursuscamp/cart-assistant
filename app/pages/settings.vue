@@ -110,39 +110,6 @@
           </div>
         </div>
       </div>
-
-      <div class="card lg:col-span-2">
-        <div class="section-header">
-          <div class="flex items-center gap-3">
-            <div class="w-8 h-8 rounded-lg bg-secondary/20 flex items-center justify-center">
-              <svg class="w-5 h-5 text-secondary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
-              </svg>
-            </div>
-            <h3 class="font-semibold text-white">LLM Configuration</h3>
-          </div>
-        </div>
-        <div class="card-body">
-          <div class="bg-bark-900/50 border border-bark-800 rounded-lg p-4 mb-4">
-            <div class="flex items-center gap-3 mb-3">
-              <svg class="w-5 h-5 text-forest-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
-              <p class="text-sm text-bark-300">OpenRouter API is configured via environment variables.</p>
-            </div>
-          </div>
-          <div class="grid sm:grid-cols-2 gap-4">
-            <div class="p-4 rounded-lg bg-bark-900/50 border border-bark-800">
-              <p class="text-xs text-bark-500 uppercase tracking-wide mb-1">API Key</p>
-              <p class="text-white font-mono text-sm">{{ openrouterApiKey ? '••••••••••••••••' : 'Not configured' }}</p>
-            </div>
-            <div class="p-4 rounded-lg bg-bark-900/50 border border-bark-800">
-              <p class="text-xs text-bark-500 uppercase tracking-wide mb-1">Model</p>
-              <p class="text-white font-mono text-sm break-all">{{ openrouterModel }}</p>
-            </div>
-          </div>
-        </div>
-      </div>
     </div>
 
     <Modal :show="showAddSectionModal" :title="editingSection ? 'Edit Section' : 'Add Section'" @close="closeSectionModal">
@@ -168,12 +135,8 @@ import { useSectionsStore, type Section } from '~/stores/sections'
 import Modal from '~/components/Modal.vue'
 import ConfirmationModal from '~/components/ConfirmationModal.vue'
 
-const config = useRuntimeConfig()
 const sectionsStore = useSectionsStore()
 const toast = useToast()
-
-const openrouterApiKey = config.openrouterApiKey
-const openrouterModel = config.openrouterModel
 
 const mappings = ref<Array<{ item_name: string; section_id: number; section_name: string; is_manual_override: number }>>([])
 const mappingSearch = ref('')
