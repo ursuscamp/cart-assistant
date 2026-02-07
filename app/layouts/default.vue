@@ -26,11 +26,7 @@
       <!-- Logo -->
       <div class="px-4 py-4 bg-gradient-to-br from-forest-800 to-forest-950 border-b border-bark-800">
         <div class="flex items-center gap-3">
-          <div class="w-10 h-10 rounded-lg bg-forest-600 flex items-center justify-center shadow-lg shadow-forest-900/30">
-            <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
-            </svg>
-          </div>
+          <img src="/source-logo.png" alt="Cart Assistant" class="w-10 h-10 rounded-lg bg-forest-600 p-1" />
           <div>
             <h1 class="text-lg font-bold text-white">Cart Assistant</h1>
             <p class="text-xs text-forest-300">Smart Grocery Lists</p>
