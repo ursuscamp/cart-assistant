@@ -48,49 +48,52 @@
         <div class="section-header px-4 py-3">
           <div class="flex items-center justify-between">
             <div class="flex items-center gap-3">
-              <div class="w-8 h-8 rounded-lg bg-forest-600/20 flex items-center justify-center flex-shrink-0">
-                <svg class="w-4 h-4 text-forest-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+              <button @click="section.isClosed = !section.isClosed; if (!section.isClosed) manuallyClosedSections.value.delete(section.id); else manuallyClosedSections.value.add(section.id)" class="w-8 h-8 rounded-lg bg-forest-600/20 flex items-center justify-center flex-shrink-0 touch-manipulation">
+                <svg :class="['w-4 h-4 text-forest-400 transition-transform', section.isClosed ? '' : 'rotate-90']" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
                 </svg>
-              </div>
+              </button>
               <h3 class="font-semibold text-white">{{ section.name }}</h3>
-              <span class="badge">{{ section.items.length }}</span>
+              <span class="badge">{{ section.items.filter(i => !i.is_checked).length || '✓' }}</span>
             </div>
           </div>
         </div>
-        <draggable 
-          v-model="section.items" 
-          group="grocery-items" 
-          item-key="id"
-          class="divide-y divide-bark-800"
-          ghost-class="opacity-50"
-          drag-class="opacity-100"
-          @end="onDragEnd(section)"
-        >
-          <template #item="{ element: item }">
-            <div :class="['flex items-center gap-2 lg:gap-4 px-3 lg:px-4 py-3 lg:py-4 transition-all duration-200 touch-manipulation', item.is_checked ? 'bg-bark-900/30' : 'hover:bg-bark-800/30']">
-              <div class="flex-shrink-0 cursor-grab">
-                <svg class="w-4 h-4 text-bark-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8h16M4 16h16" />
-                </svg>
+        <div v-if="!section.isClosed">
+          <draggable
+            v-model="section.items"
+            group="grocery-items"
+            item-key="id"
+            class="divide-y divide-bark-800"
+            ghost-class="opacity-50"
+            drag-class="opacity-100"
+            handle=".drag-handle"
+            @end="onDragEnd(section)"
+          >
+            <template #item="{ element: item }">
+              <div :class="['flex items-center gap-2 lg:gap-4 px-3 lg:px-4 py-3 lg:py-4 transition-all duration-200 touch-manipulation', item.is_checked ? 'bg-bark-900/30' : 'hover:bg-bark-800/30']">
+                <div class="flex-shrink-0 drag-handle cursor-grab">
+                  <svg class="w-4 h-4 text-bark-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8h16M4 16h16" />
+                  </svg>
+                </div>
+                <div class="flex-shrink-0">
+                  <Checkbox v-model="item.is_checked" @change="toggleItem(item)" />
+                </div>
+                <span :class="['flex-1 min-w-0 text-base lg:text-lg', item.is_checked ? 'text-bark-500 line-through' : 'text-white']">
+                  {{ item.ingredient_name }}
+                </span>
+                <select :value="item.section_id || 0" @change="changeItemSection(item, Number($event.target.value))" class="bg-bark-800 border border-bark-700 text-white text-xs lg:text-sm rounded-lg px-2 py-1.5 lg:px-3 lg:py-2 focus:outline-none focus:ring-1 focus:ring-forest-500 w-24 lg:w-32 flex-shrink-0">
+                  <option v-for="s in allSections" :key="s.id" :value="s.id">{{ s.name }}</option>
+                </select>
+                <button @click="removeItem(item)" class="p-2 rounded-lg text-bark-500 hover:text-red-400 hover:bg-red-900/20 transition-colors flex-shrink-0 touch-manipulation">
+                  <svg class="w-4 h-4 lg:w-5 lg:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
               </div>
-              <div class="flex-shrink-0">
-                <Checkbox v-model="item.is_checked" @change="toggleItem(item)" />
-              </div>
-              <span :class="['flex-1 min-w-0 text-base lg:text-lg', item.is_checked ? 'text-bark-500 line-through' : 'text-white']">
-                {{ item.ingredient_name }}
-              </span>
-              <select :value="item.section_id || 0" @change="changeItemSection(item, Number($event.target.value))" class="bg-bark-800 border border-bark-700 text-white text-xs lg:text-sm rounded-lg px-2 py-1.5 lg:px-3 lg:py-2 focus:outline-none focus:ring-1 focus:ring-forest-500 w-24 lg:w-32 flex-shrink-0">
-                <option v-for="s in allSections" :key="s.id" :value="s.id">{{ s.name }}</option>
-              </select>
-              <button @click="removeItem(item)" class="p-2 rounded-lg text-bark-500 hover:text-red-400 hover:bg-red-900/20 transition-colors flex-shrink-0 touch-manipulation">
-                <svg class="w-4 h-4 lg:w-5 lg:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                </svg>
-              </button>
-            </div>
-          </template>
-        </draggable>
+            </template>
+          </draggable>
+        </div>
       </div>
     </div>
 
@@ -134,7 +137,8 @@ const showAddSourceModal = ref(false)
 const newItemName = ref('')
 const selectedSourceList = ref<string | number>('')
 
-const localSections = ref<Array<{ id: number; name: string; items: GroceryItem[] }>>([])
+const localSections = ref<Array<{ id: number; name: string; items: GroceryItem[]; isClosed?: boolean }>>([])
+const manuallyClosedSections = ref(new Set<number>())
 
 const totalCount = computed(() => groceryStore.currentList?.sections?.reduce((sum, s) => sum + s.items.length, 0) || 0)
 const checkedCount = computed(() => groceryStore.currentList?.sections?.reduce((sum, s) => sum + s.items.filter(i => i.is_checked).length, 0) || 0)
@@ -169,10 +173,14 @@ watch(() => groceryStore.currentList, () => {
 
 function syncLocalSections() {
   if (groceryStore.currentList?.sections) {
-    localSections.value = groceryStore.currentList.sections.map(s => ({
-      ...s,
-      items: [...s.items]
-    }))
+    localSections.value = groceryStore.currentList.sections.map(s => {
+      const allChecked = s.items.length > 0 && s.items.every(i => i.is_checked)
+      return {
+        ...s,
+        items: [...s.items],
+        isClosed: allChecked || manuallyClosedSections.value.has(s.id)
+      }
+    })
   }
 }
 
@@ -185,7 +193,13 @@ async function onItemDrop(evt: any, targetSectionId: number) {
 }
 
 async function toggleItem(item: GroceryItem) {
-  if (groceryStore.currentList) await groceryStore.toggleChecked(groceryStore.currentList.id, item.id, item.is_checked)
+  if (groceryStore.currentList) {
+    await groceryStore.toggleChecked(groceryStore.currentList.id, item.id, item.is_checked, groceryStore.currentList)
+    if (!item.is_checked) {
+      const section = localSections.value.find(s => s.items.some(i => i.id === item.id))
+      if (section) manuallyClosedSections.value.delete(section.id)
+    }
+  }
 }
 
 async function addItem() {

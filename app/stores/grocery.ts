@@ -102,8 +102,26 @@ export const useGroceryStore = defineStore('grocery', {
       await this.fetchList(listId)
     },
 
-    async toggleChecked(listId: number, itemId: number, isChecked: boolean) {
-      await this.updateItem(listId, itemId, { is_checked: isChecked })
+    async toggleChecked(listId: number, itemId: number, isChecked: boolean, currentList?: GroceryList) {
+      let sort_order: number | undefined
+
+      if (currentList) {
+        for (const section of currentList.sections) {
+          const item = section.items.find(i => i.id === itemId)
+          if (item) {
+            if (isChecked) {
+              const maxOrder = Math.max(0, ...section.items.map(i => i.sort_order))
+              sort_order = maxOrder + 1
+            } else {
+              const minOrder = Math.min(...section.items.map(i => i.sort_order))
+              sort_order = minOrder - 1
+            }
+            break
+          }
+        }
+      }
+
+      await this.updateItem(listId, itemId, { is_checked: isChecked, sort_order })
     },
 
     async reorderSections(listId: number, sectionIds: number[]) {
