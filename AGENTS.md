@@ -3,6 +3,7 @@
 ## Project Overview
 
 Cart Assistant is a Nuxt 3 grocery list management application with AI-powered sorting. It uses:
+
 - **Frontend**: Vue 3, Headless UI, Tailwind CSS, Pinia
 - **Backend**: Nuxt server routes (Nitro), SQLite via sql.js
 - **AI**: OpenRouter API for sorting items into grocery sections
@@ -57,16 +58,17 @@ docker run -p 3000:3000 -v ./data:/data -e DATABASE_PATH=/data/grocery.db cart-a
 - Use `onMounted` for client-side initialization
 
 Example:
+
 ```typescript
 const props = defineProps<{
-  show: boolean
-  title?: string
-}>()
+  show: boolean;
+  title?: string;
+}>();
 
 const emit = defineEmits<{
-  (e: 'close'): void
-  (e: 'confirm'): void
-}>()
+  (e: 'close'): void;
+  (e: 'confirm'): void;
+}>();
 ```
 
 ### Styling (Tailwind CSS)
@@ -93,14 +95,15 @@ const emit = defineEmits<{
 - Use `$fetch` in frontend stores for API calls
 
 Example:
+
 ```typescript
-import { getDatabase } from '~~/server/utils/db'
+import { getDatabase } from '~~/server/utils/db';
 
 export default defineEventHandler(async () => {
-  const db = await getDatabase()
-  const result = db.exec('SELECT * FROM sections ORDER BY display_order')
+  const db = await getDatabase();
+  const result = db.exec('SELECT * FROM sections ORDER BY display_order');
   // ...
-})
+});
 ```
 
 ### Database (sql.js)
@@ -131,33 +134,34 @@ export default defineEventHandler(async () => {
 - Group imports: external libs, internal modules, components
 
 Example:
+
 ```typescript
-import { defineStore } from 'pinia'
-import { useGroceryStore, type GroceryItem } from '~/stores/grocery'
-import Modal from '~/components/Modal.vue'
+import { defineStore } from 'pinia';
+import { useGroceryStore, type GroceryItem } from '~/stores/grocery';
+import Modal from '~/components/Modal.vue';
 ```
 
 ## Key Files
 
-| Path | Purpose |
-|------|---------|
-| `app/stores/*.ts` | Pinia stores for state management |
-| `app/pages/*.vue` | Route pages |
-| `app/components/*.vue` | Reusable components |
-| `app/layouts/default.vue` | Main layout with sidebar |
-| `server/utils/db.ts` | SQLite database initialization/migrations |
-| `server/api/**/` | API endpoints |
-| `tailwind.config.ts` | Custom colors and theme |
+| Path                      | Purpose                                   |
+| ------------------------- | ----------------------------------------- |
+| `app/stores/*.ts`         | Pinia stores for state management         |
+| `app/pages/*.vue`         | Route pages                               |
+| `app/components/*.vue`    | Reusable components                       |
+| `app/layouts/default.vue` | Main layout with sidebar                  |
+| `server/utils/db.ts`      | SQLite database initialization/migrations |
+| `server/api/**/`          | API endpoints                             |
+| `tailwind.config.ts`      | Custom colors and theme                   |
 
 ## Environment Variables
 
-| Variable | Required | Description |
-|----------|----------|-------------|
-| `DATABASE_PATH` | Yes | Path to SQLite DB (e.g., `data/grocery.db`) |
-| `OPENROUTER_API_KEY` | Yes | OpenRouter API key for LLM |
-| `OPENROUTER_MODEL` | No | Model name (default: `google/gemini-3-flash-preview`) |
-| `NUXT_HOST` | No | Host to bind (default: `0.0.0.0`) |
-| `NUXT_PORT` | No | Port to bind (default: `3000`) |
+| Variable             | Required | Description                                           |
+| -------------------- | -------- | ----------------------------------------------------- |
+| `DATABASE_PATH`      | Yes      | Path to SQLite DB (e.g., `data/grocery.db`)           |
+| `OPENROUTER_API_KEY` | Yes      | OpenRouter API key for LLM                            |
+| `OPENROUTER_MODEL`   | No       | Model name (default: `google/gemini-3-flash-preview`) |
+| `NUXT_HOST`          | No       | Host to bind (default: `0.0.0.0`)                     |
+| `NUXT_PORT`          | No       | Port to bind (default: `3000`)                        |
 
 ## Common Tasks
 
@@ -187,3 +191,7 @@ import Modal from '~/components/Modal.vue'
 1. Edit `server/utils/db.ts:runMigrations()`
 2. Add new `CREATE TABLE` or `ALTER TABLE` statements
 3. Test migration works on existing DB
+
+### Formatting
+
+1. Run prettier to format the files cleanly after changes.

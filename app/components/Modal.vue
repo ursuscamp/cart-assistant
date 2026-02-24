@@ -4,9 +4,18 @@
       <div :class="['modal-container', size]" @click.stop>
         <div v-if="title" class="modal-header flex-shrink-0">
           <h3 class="text-lg font-semibold text-white">{{ title }}</h3>
-          <button v-if="showClose" @click="$emit('close')" class="p-1 rounded-lg text-bark-400 hover:text-white hover:bg-bark-800 transition-colors">
+          <button
+            v-if="showClose"
+            @click="$emit('close')"
+            class="p-1 rounded-lg text-bark-400 hover:text-white hover:bg-bark-800 transition-colors"
+          >
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M6 18L18 6M6 6l12 12"
+              />
             </svg>
           </button>
         </div>
@@ -22,19 +31,22 @@
 </template>
 
 <script setup lang="ts">
-withDefaults(defineProps<{
-  show: boolean
-  title?: string
-  size?: 'sm' | 'md' | 'lg' | 'xl'
-  showClose?: boolean
-}>(), {
-  size: 'md',
-  showClose: true
-})
+withDefaults(
+  defineProps<{
+    show: boolean;
+    title?: string;
+    size?: 'sm' | 'md' | 'lg' | 'xl';
+    showClose?: boolean;
+  }>(),
+  {
+    size: 'md',
+    showClose: true
+  }
+);
 
 defineEmits<{
-  (e: 'close'): void
-}>()
+  (e: 'close'): void;
+}>();
 </script>
 
 <style scoped>

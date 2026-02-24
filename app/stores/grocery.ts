@@ -1,30 +1,30 @@
-import { defineStore } from 'pinia'
+import { defineStore } from 'pinia';
 
 export interface GroceryItem {
-  id: number
-  ingredient_name: string
-  section_id?: number
-  section_name?: string
-  is_checked: boolean
-  sort_order: number
+  id: number;
+  ingredient_name: string;
+  section_id?: number;
+  section_name?: string;
+  is_checked: boolean;
+  sort_order: number;
 }
 
 export interface GrocerySection {
-  id: number
-  name: string
-  display_order: number
-  items: GroceryItem[]
+  id: number;
+  name: string;
+  display_order: number;
+  items: GroceryItem[];
 }
 
 export interface GroceryList {
-  id: number
-  name: string
-  week_of: string
-  sections: GrocerySection[]
-  uncategorized?: GroceryItem[]
-  sources: Array<{ id: number; name: string }>
-  item_count?: number
-  checked_count?: number
+  id: number;
+  name: string;
+  week_of: string;
+  sections: GrocerySection[];
+  uncategorized?: GroceryItem[];
+  sources: Array<{ id: number; name: string }>;
+  item_count?: number;
+  checked_count?: number;
 }
 
 export const useGroceryStore = defineStore('grocery', {
@@ -36,23 +36,23 @@ export const useGroceryStore = defineStore('grocery', {
 
   actions: {
     async fetchLists() {
-      this.loading = true
+      this.loading = true;
       try {
-        const data = await $fetch<GroceryList[]>('/api/grocery-lists')
-        this.lists = data
+        const data = await $fetch<GroceryList[]>('/api/grocery-lists');
+        this.lists = data;
       } finally {
-        this.loading = false
+        this.loading = false;
       }
     },
 
     async fetchList(id: number) {
-      this.loading = true
+      this.loading = true;
       try {
-        const data = await $fetch<GroceryList>(`/api/grocery-lists/${id}`)
-        this.currentList = data
-        return data
+        const data = await $fetch<GroceryList>(`/api/grocery-lists/${id}`);
+        this.currentList = data;
+        return data;
       } finally {
-        this.loading = false
+        this.loading = false;
       }
     },
 
@@ -60,19 +60,19 @@ export const useGroceryStore = defineStore('grocery', {
       const list = await $fetch<GroceryList>('/api/grocery-lists', {
         method: 'POST',
         body: { name, sourceListIds }
-      })
-      this.lists.unshift(list)
-      return list
+      });
+      this.lists.unshift(list);
+      return list;
     },
 
     async updateListName(id: number, name: string) {
       await $fetch(`/api/grocery-lists/${id}`, {
         method: 'PUT',
         body: { name }
-      })
-      const list = this.lists.find(l => l.id === id)
+      });
+      const list = this.lists.find((l) => l.id === id);
       if (list) {
-        list.name = name
+        list.name = name;
       }
     },
 
@@ -80,66 +80,78 @@ export const useGroceryStore = defineStore('grocery', {
       const item = await $fetch<GroceryItem>(`/api/grocery-lists/${listId}/add-item`, {
         method: 'POST',
         body: { name }
-      })
-      await this.fetchList(listId)
-      return item
+      });
+      await this.fetchList(listId);
+      return item;
     },
 
     async addSource(listId: number, sourceListId: number) {
-      const result = await $fetch<{ added: string[]; count: number }>(`/api/grocery-lists/${listId}/add-source`, {
-        method: 'POST',
-        body: { sourceListId }
-      })
-      await this.fetchList(listId)
-      return result
+      const result = await $fetch<{ added: string[]; count: number }>(
+        `/api/grocery-lists/${listId}/add-source`,
+        {
+          method: 'POST',
+          body: { sourceListId }
+        }
+      );
+      await this.fetchList(listId);
+      return result;
     },
 
-    async updateItem(listId: number, itemId: number, updates: Partial<GroceryItem> & { is_manual_override?: boolean }) {
+    async updateItem(
+      listId: number,
+      itemId: number,
+      updates: Partial<GroceryItem> & { is_manual_override?: boolean }
+    ) {
       await $fetch(`/api/grocery-lists/${listId}/items/${itemId}`, {
         method: 'PUT',
         body: updates
-      })
-      await this.fetchList(listId)
+      });
+      await this.fetchList(listId);
     },
 
-    async toggleChecked(listId: number, itemId: number, isChecked: boolean, currentList?: GroceryList) {
-      let sort_order: number | undefined
+    async toggleChecked(
+      listId: number,
+      itemId: number,
+      isChecked: boolean,
+      currentList?: GroceryList
+    ) {
+      let sort_order: number | undefined;
 
       if (currentList) {
         for (const section of currentList.sections) {
-          const item = section.items.find(i => i.id === itemId)
+          const item = section.items.find((i) => i.id === itemId);
           if (item) {
             if (isChecked) {
-              const maxOrder = Math.max(0, ...section.items.map(i => i.sort_order))
-              sort_order = maxOrder + 1
+              const maxOrder = Math.max(0, ...section.items.map((i) => i.sort_order));
+              sort_order = maxOrder + 1;
             } else {
-              const minOrder = Math.min(...section.items.map(i => i.sort_order))
-              sort_order = minOrder - 1
+              const minOrder = Math.min(...section.items.map((i) => i.sort_order));
+              sort_order = minOrder - 1;
             }
-            break
+            break;
           }
         }
       }
 
-      await this.updateItem(listId, itemId, { is_checked: isChecked, sort_order })
+      await this.updateItem(listId, itemId, { is_checked: isChecked, sort_order });
     },
 
     async reorderSections(listId: number, sectionIds: number[]) {
       await $fetch(`/api/grocery-lists/${listId}/reorder-sections`, {
         method: 'POST',
         body: { sectionIds }
-      })
-      await this.fetchList(listId)
+      });
+      await this.fetchList(listId);
     },
 
     async deleteList(id: number) {
-      await $fetch(`/api/grocery-lists/${id}`, { method: 'DELETE' })
-      this.lists = this.lists.filter(l => l.id !== id)
+      await $fetch(`/api/grocery-lists/${id}`, { method: 'DELETE' });
+      this.lists = this.lists.filter((l) => l.id !== id);
     },
 
     async deleteItem(listId: number, itemId: number) {
-      await $fetch(`/api/grocery-lists/${listId}/items/${itemId}`, { method: 'DELETE' })
-      await this.fetchList(listId)
+      await $fetch(`/api/grocery-lists/${listId}/items/${itemId}`, { method: 'DELETE' });
+      await this.fetchList(listId);
     }
   }
-})
+});

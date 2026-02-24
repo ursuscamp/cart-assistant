@@ -1,9 +1,9 @@
-import { defineStore } from 'pinia'
+import { defineStore } from 'pinia';
 
 export interface Section {
-  id: number
-  name: string
-  display_order: number
+  id: number;
+  name: string;
+  display_order: number;
 }
 
 export const useSectionsStore = defineStore('sections', {
@@ -14,12 +14,12 @@ export const useSectionsStore = defineStore('sections', {
 
   actions: {
     async fetchSections() {
-      this.loading = true
+      this.loading = true;
       try {
-        const data = await $fetch<Section[]>('/api/sections')
-        this.sections = data
+        const data = await $fetch<Section[]>('/api/sections');
+        this.sections = data;
       } finally {
-        this.loading = false
+        this.loading = false;
       }
     },
 
@@ -27,33 +27,33 @@ export const useSectionsStore = defineStore('sections', {
       const section = await $fetch<Section>('/api/sections', {
         method: 'POST',
         body: { name }
-      })
-      this.sections.push(section)
-      return section
+      });
+      this.sections.push(section);
+      return section;
     },
 
     async updateSection(id: number, name: string) {
       const section = await $fetch<Section>(`/api/sections/${id}`, {
         method: 'PUT',
         body: { name }
-      })
-      const index = this.sections.findIndex(s => s.id === id)
+      });
+      const index = this.sections.findIndex((s) => s.id === id);
       if (index !== -1) {
-        this.sections[index] = section
+        this.sections[index] = section;
       }
     },
 
     async deleteSection(id: number) {
-      await $fetch(`/api/sections/${id}`, { method: 'DELETE' })
-      this.sections = this.sections.filter(s => s.id !== id)
+      await $fetch(`/api/sections/${id}`, { method: 'DELETE' });
+      this.sections = this.sections.filter((s) => s.id !== id);
     },
 
     async reorderSections(sectionIds: number[]) {
       await $fetch('/api/sections/reorder', {
         method: 'POST',
         body: { sectionIds }
-      })
-      await this.fetchSections()
+      });
+      await this.fetchSections();
     }
   }
-})
+});
