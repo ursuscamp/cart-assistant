@@ -195,6 +195,7 @@
 
     <Modal :show="showAddItemModal" title="Add Item" @close="showAddItemModal = false">
       <input
+        ref="addItemInput"
         v-model="newItemName"
         type="text"
         class="input-field"
@@ -239,6 +240,7 @@ const toast = useToast();
 const showAddItemModal = ref(false);
 const showAddSourceModal = ref(false);
 const newItemName = ref('');
+const addItemInput = ref<HTMLInputElement | null>(null);
 const selectedSourceList = ref<string | number>('');
 
 const localSections = ref<
@@ -296,6 +298,13 @@ watch(
     syncLocalSections();
   }
 );
+
+watch(showAddItemModal, async (isOpen) => {
+  if (!isOpen) return;
+
+  await nextTick();
+  addItemInput.value?.focus();
+});
 
 function syncLocalSections() {
   if (groceryStore.currentList?.sections) {
